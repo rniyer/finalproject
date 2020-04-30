@@ -400,19 +400,32 @@ library(stringr)
 <p>TEST SCORES = α + β(BMI) + CONTROLS + ϵ, where i = 1,⋯,n (5)</p>
 <p>TEST SCORES = α + β(BMI-for-Age Z Score) + CONTROLS + ϵ, where i = 1,⋯,n (6)</p>
 <p>TEST SCORES = α + β(Stunting Status) + CONTROLS + ϵ, where i = 1,⋯,n (7)</p>
-<p>In the above equations, “CONTROLS” refers to the parameters that will be included in the model as covariates and their respective coefficients/posterior distributions. These covariates are chosen based on whether they are expected to make up some of the variation in test scores (outside of the variation explained by the various independent variables of interest). We do this so that we can isolate the</p>
-<p>I am also curious as to how different, but relatively close sample sizes will impact the spread of the posterior distribution. Given that the younger cohort data set has approximately 2,000 students in it, I will test the relationship of interest on various groups of students (n = 100, 200, 500, 1000, 2000) to see how estimates change. In addition, I will estimate the model on the same children, but at different ages (using different rounds of data collected) to see if there is a differential estimated impact by age.</p>
+<p>In the above equations, “CONTROLS” refers to the parameters that will be included in the model as covariates and their respective coefficients/posterior distributions. These covariates are chosen based on whether they are expected to make up some of the variation in test scores (outside of the variation explained by the various independent variables of interest). We do this so that we can isolate the impact of the independent variable of interest on test scores, the dependent variable. Controls that will be included are mainly socioeconomic and demographic variables, like wealth, region, child age, access to services, etc.</p>
 </div>
 <div id="data-description" class="section level3">
 <h3>Data Description</h3>
 <p>I will apply Bayesian regression to data from the Young Lives Project, a 15-year study of the changing nature of childhood poverty in Ethiopia, India (Andhra Pradesh and Telangana), Peru and Vietnam. I will specifically use a constructed longitudinal data set from India, with data collected every few years from 2002 to 2016. As a part of the Young Lives research project in India, 1,000 children were sampled for the older cohort (aged 7.5 to 8.5 years old at the start of the study) and 2,000 children were sampled for the younger cohort (aged 6 to 18 months old at the start of the study). I will use the younger cohort data for this analysis. The sampling methodology in the dataset of interest is multi-stage and randomly sampled, considered to be nationally representative. The individuals and their households within each cohort were visited five times, comprising five total rounds of data collection per child. The attrition is low, estimated at approximately 1.5 percent across rounds.</p>
+<p>I am also curious as to how different, but relatively close sample sizes will impact the spread of the posterior distribution. Given that the younger cohort data set has approximately 2,000 students in it, I will test the relationship of interest on various groups of students (n = 100, 200, 500, 1000, 2000) to see how estimates change. In addition, I will estimate the model on the same children, but at different ages (using rounds 2 and 3 of data collection) to see if there is a differential estimated impact by age.</p>
 </div>
 <div id="application-of-methods" class="section level3">
 <h3>Application of Methods</h3>
-<p>setwd(“Users/ritikaiyer/data/project”)</p>
-<p>younglives &lt;- read_csv(“project/projectdata.csv”)</p>
-<p>Sources: <a href="https://towardsdatascience.com/introduction-to-bayesian-linear-regression-e66e60791ea7" class="uri">https://towardsdatascience.com/introduction-to-bayesian-linear-regression-e66e60791ea7</a></p>
-<p>Next Steps: Build out mathematical explanation of Bayesian Regression (with equations and proof) Improve literature review (diversify sources, add in historical perspective) Apply methods to example of interest after better determining priors for each parameter. I want to better understand if other years of data can be used as priors for the years used in the analysis (i.e., using data in the file from Rounds 1 and 2 as informative to the model application that uses data from Round 3 exclusively).</p>
+<pre class="load"><code>setwd(&quot;Users/ritikaiyer/data/project&quot;)
+
+younglives &lt;- read_csv(&quot;project/projectdata.csv&quot;) </code></pre>
+</div>
+<div id="sources" class="section level3">
+<h3>Sources:</h3>
+<p><a href="https://towardsdatascience.com/introduction-to-bayesian-linear-regression-e66e60791ea7" class="uri">https://towardsdatascience.com/introduction-to-bayesian-linear-regression-e66e60791ea7</a></p>
+<p><a href="https://statswithr.github.io/book/introduction-to-bayesian-regression.html" class="uri">https://statswithr.github.io/book/introduction-to-bayesian-regression.html</a></p>
+<p><a href="https://www.younglives.org.uk" class="uri">https://www.younglives.org.uk</a></p>
+</div>
+<div id="next-steps" class="section level3">
+<h3>Next Steps:</h3>
+<ol style="list-style-type: decimal">
+<li>Build out mathematical explanation of Bayesian Regression (with equations and proof)</li>
+<li>Improve literature review (diversify sources, add in historical perspective)</li>
+<li>Apply methods to example of interest after better determining priors for each parameter. I want to better understand if other years of data can be used as priors for the years used in the analysis (i.e., using data in the file from Rounds 1 and 2 as informative to the model application that uses data from Round 3 exclusively).</li>
+</ol>
 </div>
 </div>
 
