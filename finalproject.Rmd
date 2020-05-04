@@ -98,6 +98,7 @@ I am  also curious as to how different, but relatively close sample sizes will i
 
 ### Initial Descriptive Statistics and Analysis
 The below code first loads packages that will be useful for the analysis.
+
 ```{r load-packages, message = FALSE}
 library(sf) 
 library(tidyverse) 
@@ -246,6 +247,23 @@ ggplot(younglives, aes(x = r3math_corrected_rasch)) +
        caption = "Source: Young Lives Survey, 2009")
 
 ```
+
+
+### Bayesian Inference 
+There are four main steps involved in a Bayesian inferential analysis, as outlined below. 
+
+Firstly, we must specify the probability model, which is based on the likelhood of the observed data and the specified priors. We expect that the priors are the main differentiating factors between the Bayesian and Frequentist results, since the likelihood is based on the outcome and often will not vary across model types (James, 2019). For the purpose of this analysis, we will use default prior distributions from the rstanarm package in R. The Stan general package is a probability-based language specifically used for Bayesian statistical inference (Stan, 2020). For this analysis, we will use a linear regression model where the outcome y, PPVT test score, is normal given the covariate of interest, BMI, and the control variables. We also assume that the linear model has independent errors. These assumptions imply that the posterior distribution will have multiple parameters, one associated with each covariate, a constant, and an error term. Again, these parameters will be estimated using default priors from the rstanarm package, which helps determine the probability model of interest. As discussed previously and based on the descriptive statistics, the model we are attempting to estimate is in Equation 7 below. 
+
+PPVT TEST SCORE = α + β(BMI) + β1(WEALTH INDEX) + β2(CHILDAGE) + β3(FEMALE) + β4(HH SIZE) + β5(TOTAL MONTHLY EXPENDITURE) + β6(RURAL) + ϵ, where i = 1,⋯,n     (7)
+
+Given the above model specification, the next step is to draw samples form the posterior distribution (James, 2019). This process gives us an updated distribution of each parameter based on the data we have. The default method that the Stan package uses is the Markov Chain Monte Carlo (MCMC) method, which improves the model search efficiency to obtain the samples. The code for this model is shown below. 
+
+```{r bayesmodel-ppvt, message = FALSE}
+ppvtbayes <- stan_glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives, family = gaussian)
+
+```
+
+The next step in the Bayesian inference process is to evaluate the model to ensure that the MCMC methodology of sampling is working (James, 2019). 
 
 
 
