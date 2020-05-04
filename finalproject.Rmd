@@ -1,0 +1,123 @@
+---
+title: "Final Project"
+author: "Ritika Iyer"
+date: "4/26/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+Regression methods are useful for estimating a relationship between two variables, x and y. Here, we treat x as the independent variable that has an estimated impact, measured through the regression method, on our dependent or outcome variable y. In bivariate regression models, x and y are the only relevant variables included, an the estimated impact of x on y is found in the 'coefficient' on the x-term. Equation 1 below shows an example of a bivariate model between x and y, where b is the coefficient that tells us the estimated impact of an increase in x on y (Koehrsen, 2018). The error term, e, represents all other effects of variables that are not listed in the model.
+
+y = a + b(x) + e     (1)
+
+However, bivariate models are most often subject to omitted variable bias, an issue that arises when additional variables that have an impact on y are not included in the model. Omitted variable bias results in a biased coefficient on x, or a biased b estimate. For this reason, multivariate models that include several x's rather than just the one of interest are generally preferred. 
+
+In frequentist models of linear regression, like the one showed above, we are able to obtain point estimates of the relationship of interest. This paper will focus on another type of regression, Bayesian Linear Regression. The Bayesian method of regression estimates probability distributions rather than point estimates (Clyde et al., 2020). Using a similar framework introduced in Equation 1 above, the Bayesian linear regression model estimates a distribution of outcomes for the output y sampled from a normal distribution of the x's included (Koehrsen, 2018). Equation 2 below shows an example of this. 
+
+y ~ N(bX,o^2I)      (2)
+
+### INTRODUCTION TO BAYESIAN THINKING AND METHODOLOGY:
+Before diving into the specifics of the Bayesian regression model, it is important to first understand the theory of conditional probabilities that it relies upon. Let us assume that there are two events, Event A and Event B. The probability that Event A occurs is p(A) and the probability that Event B occurs is p(B). If Event A’s occurrence is unrelated to Event B’s occurrence or non-occurrence, that means the two events are independent. In this case, the joint probability of both events occurring is equal to p(A and B) = p(A)*p(B). 
+
+However, if Event A’s occurrence is conditional upon Event B’s occurrence, then the two events are not independent. A conditional probability is the probability that Event A will happen, given that another event, Event B, already occurred. If we know that Event B happened, then the conditional probability of Event A happening is equal to p(A/B). In this case with conditionality involved, the joint probability of the two events occurring is p(A and B) = p(A)*p(B/A). 
+
+We can use the concepts of joint and conditional probabilities to derive the Bayes theorem, which is p(A/B) = p(A)*p(B/A) / p(B). This equation is interpreted as the probability of Event A occurring given that Event B has occurred is equal to the unconditional probability of Event A occurring times the conditional probability of Event B occurring given that Event A has occurred, divided by the simple unconditional probability of Event B occurring (Inzaugarat, 2018).
+
+### Bayesian Linear Regression
+As discussed above, the main goal of Bayesian Linear Regression is to determine the posterior distribution for the parameters in the model of interest. This is in contrast to frequentist regression models that seek to estimate a single value for each parameter that is considered the best estimate (Koehrsen, 2018). In Bayesian models, the posterior probability of the parameters of interest are conditional upon prior probabilities of their inputs and outputs (Clyde et al., 2020). Equation 3 below shows the fundamental expression of Bayes Theorem, which underlies the Bayesian regression method (Clyde et al., 2020). 
+
+Posterior = (Likelihood * Prior) / Normalization      (3)
+
+In words, we can interpret Equation 3 as the following: the posterior distribution generated from a Bayesian regression model for the parameters is proportional to the likelihood of the parameters data times the prior probability of those parameters (Koehrsen, 2018). Equation 4 below shows how we would start with a Bayesian mode, which assumes that the error term is independent and distributed as normal random variables are (Koehrsen, 2018). 
+
+y = α + βx + ϵ, i = 1,⋯,n     (4)
+
+We can apply the Bayes theorem and probability framework discussed previously to Bayesian regression models, particularly around updating the probability of a hypothesis occurring upon having new data to incorporate in the model (Inzaugarat, 2018). Going back to the Event A and Event B world, we see that the prior, or the probability of the hypothesis before seeing the data, is equal to p(A). The conditional probability of Event A given Event B, or p(A/B), is what we are trying to estimate – the probability of the hypothesis after we see our data, the posterior distribution. The opposite conditional probability of Event B given Event A’s occurrence, equal to p(B/A), is the probability of the data given the hypothesis, or the likelihood estimation. Finally, the simple probability of Event B, p(B), can also be interpreted as the probability of the data under any hypothesis. This probability is also called the normalizing constant under a Bayesian framework (Inzaugarat, 2018).
+
+In a situation where one is comparing two hypotheses or models, the Bayes factor can help quantify the strength and quality of one model over another. The Bayes factor is the ratio of the likelihood probabilities, or the probabilities of the data given the hypothesis, for the two hypotheses of interest (Inzaugarat, 2018). Hypotheses could vary based on the choice of priors, amount of data, and type of priors (informative versus non-informative, for example). 
+
+As compared to frequentist regression, there are a few main benefits of using a Bayesian regression model. Firstly, Bayesian regression leverages priors, which can include educated guesses for model parameters or estimates based on domain knowledge. This is helpful, because compared to frequentist models, we can actually utilize knowledge outside of the data itself to inform our predictions in a positive way (Koehrsen, 2018). Even without helpful priors for all parameters, Bayesian regression allows us to use non-informative priors to improve our model, like assuming a normal distribution. The second benefit of Bayesian regression is that it allows us to quantify how uncertain we are about the model estimates, because it produces a distribution of possibilites for each parameter based on the data used and the priors assumed (Clyde et al., 2020). Based on this, models using smaller data (i.e., with fewer data points) will result in a wider distribution. As the number of data points increases, the parameters converge closer to those estimated from OLS because the likelihood takes over the impact of the priors for each parameter (Clyde et al., 2020). These concepts will be discussed further in the following section.
+
+### Frequentist versus Bayesian Models
+The use of a normative, consistent rule does not apply to frequentist models (Freedman, 1995). However, we can calculate posterior probabilities under the Bayesian framework through the use of Bayes’s Theorem, which allows for consistent methodology across applications. Using density functions, Bayes’s Theorem allows us to draw conclusions about the parameters included in a model by looking at their posterior distribution that is drawn from the data based on their prior distribution. In a Bayesian framework, all parameters are considered to be random variables (in contrast to frequentist frameworks that differentiate between random and fixed parameters) and therefore from a common distribution (Fienberg, 2011). This point raises a common critique of Bayesian techniques, namely questioning the idea that all parameters included in a model are from a single prior distribution. Feinberg points out that most Bayesian analyses report results from the use of various prior distributions to illustrate the role of determining priors in the way the posterior distribution turns out. While some have suggested using a uniform prior across all parameters in a model to avoid skepticism around posterior results, others have claimed that uniform priors actually lack useful information and therefore are often not relevant (Fienberg, 2006). It is also important to note, as discussed earlier, that the more data points there are in an analysis, the less weight is given to the priors and the more weight is given to the data itself in determining the posterior distribution. 
+
+Testing for significance also varies across frequentist and Bayesian methodologies. Using a frequentist inference approach, significance tests are based on the null hypothesis – specifically by calculating a p-value that serves as the computed probability of observing a value at least as extreme as the actual value, conditional on the controls included in the model (Fienberg, 2011). This approach uses the model hypothesis to calculate the probability of the data through repeated sampling. On the other hand, the Bayesian approach uses prior inferences about the covariates based on the data. Here, we estimate the probability of a model hypothesis given the data used (Fienberg, 2011). 
+
+P-values, derived from the frequentist approach, are commonly used in the social science and policy evaluation space. They are often used to inform policy decision-making as well. However, many researchers and officials from the American Statistical Association (ASA) caution that use of p-values can often lead to misinterpretation and misinformation (ASA, 2016; Holzwart et al., 2018). Rather, social science research is increasingly moving toward Bayesian techniques (as an alternative to relying on the p-value approach) to quantify the importance of findings through the use of inference from probabilities. 
+
+### BAYESIAN METHODOLOGY IN PUBLIC POLICY:
+Bayesian regression can be a particularly interesting method to use to address public policy issues because of its ability to take into account prior information about the parameters of interest. Many policy problems are multi-faceted and evolve over time - as such, a single policy dataset is unlikely to be representative of all relevant information to the question at hand. Additionally, most policy solutions have nuance and may work differently across contexts. This dependence on context makes it hard to simply rely on point estimates as a meaningful way to design policy. For this reason, Bayesian methods that allow for the estimation of a posterior distribution, rather than a point estimate, can offer more to policymakers in terms of projected impact of a policy option. 
+
+Since results from Bayesian models are presented in probabilistic terms, many find that they are more applicable to answering public policy questions than frequentist results that use irrelevant cutoff values and provide very particular insights. Bayesian results are typically viewed as easier to interpret and apply for policymakers because they shed light on the probability of impact that one variable will have on their outcome of interest (Holzwart et al., 2018). This allows policymakers and social scientists to more effectively and holistically quantify their uncertainty associated with a particular policy option, not limited to just the uncertainty from sampling itself. Appropriate calculation of risks is very important in decision making, especially when the impacts of decisions are nation-wide. For this reason alone, Bayesian techniques are often preferred to frequentist methods in the public policy arena. 
+
+Another aspect of Bayesian methodology that make it particularly useful in social policy research and evaluation is its ability to incorporate existing information as priors, to strengthen the model’s conclusions, and also use new data to inform the conclusions in real-time (Holzwart et al., 2018). This feature can be especially relevant to assessing the impacts of a pilot social services program – researchers and policymakers could leverage priors for parameters from their performance in related public programs, as well as use conclusions from the model to improve the pilot program in areas that it is lacking (for example, addressing desired outcomes, better targeting, reduced complexity). 
+
+There are a few challenges with Bayesian methodologies that may hinder application to public policy. Given that Bayesian results are probabilistic, they often lead to a “grey area” in terms of determining the right policy conclusions. Though this does allow for flexibility in interpretation and perhaps can be more closely aligned with the nuances of real-world policy issues, it can also make it very difficult to translate results to actual and concrete policy decisions (Holzwart et al., 2018). Additionally, calculations of Bayesian results are very computationally-intensive, which can be a major issue for policymaking at the local level where budgets are potentially more constrained, resources (both in terms of human and physical processing capital) are scarce, and time is spread out over multiple priorities. Finally, selecting appropriate priors to inform the Bayesian model and posterior distribution requires extensive thought and can be challenging for many researchers (Holzwart et al., 2018). Though these prior assumptions in the policy space are often subjective, they should be rooted in facts as much as possible based on historical information, which can be difficult to reasonably parse out. Overall, these various limitations can make the application and interpretation of Bayesian methodologies impractical for certain contexts in the public arena. 
+
+### Applications of Bayesian Frameworks to Public Policy Problems
+There are many potential applications of Bayesian statistical methods in the public policy space. During the neo-Bayesian revival in the 1950s, Bayesian methods were considered to be inappropriate to use in solving public problems involving government and policy contexts because of the importance of prior distributions (Fienberg, 2011). However, as computers for statistical calculations were introduced in the 1960s and potential applications of Bayesian models increased as a result, researchers have argued that Bayesian methods can be very useful and applicable to public policy problems. This transition was aided by the 1990s introduction of Markov Chain Monte Carlo (MCMC) methods that allow for sampling from the posterior distribution (Fienberg, 2011). 
+
+Some researchers, like Stephen Fienberg, have worked extensively to make the case that utilizing priors and likelihood functions can benefit policymakers in program design and evaluation (Fienberg, 2011). One historical application of Bayesian methods in the public domain is election night forecasting, first used in the United States in the 1960s (Fienberg, 2011). These methods have been used to predict election results in other countries as well, including the U.K. (Brown et al., 1997). 
+
+Another interesting application of Bayesian methodology is in the pharmaceutical testing and regulation space, particularly used to aid the U.S. Food and Drug Administration (FDA) in bringing medical drugs and devices to the global market. Given that the clinical trial process is often lengthy, Bayesian methods have been touted as being able to speed up the information access and dissemination process for ongoing clinical trials, as compared to frequentist methods (Fienberg, 2011). In addition to improving the efficiency of clinical trials reviewed by the FDA, Bayesian methods can also improve the way that drugs and devices are evaluated by incorporating a diverse range of information as priors in the assessment process, including experimental studies, patient testimonials, observational data, and qualitative data from doctors and scientists. Bayesian techniques also offer more flexibility to the FDA and researchers, particularly in identifying issues with patient welfare upfront and allowing for modifications to the study based on them (Fienberg, 2011). Ultimately, this adaptive framework improves patient outcomes and allows for more confidence in the FDA’s drug approval process. Other relevant applications of Bayesian methodologies in the public policy space include modeling outcomes and implications of climate change (Schneider, 2002), and estimating the presence of disabilities in the elderly community in the U.S. (Fienberg, 2011). 
+
+Outside of government, many research organizations and universities have applied Bayesian techniques to address public policy problems. The Centers for Medicare and Medicaid Services (CMS) worked with RTI and RAND on two projects related to risk tolerance, program evaluation, and provider performance (Freeman et al., 2017; Paddock, 2017). At the University of Wisconsin, researchers used multiple Bayesian models to improve estimates of reading proficiency scores for international students (Kaplan, 2017). Using data on employment for low-income adults, researchers from Mathematica Policy Research used priors from past related studies to reach probabilistic conclusions (using thresholds) on the impacts of employment programs (Vollmer et al., 2017). Finally, Columbia University researcher Andrew Gelman used Bayesian analysis to better understand why there are red states and blue states, distinguished by political party support, in the U.S. In this application, Bayesian techniques allowed for the multi-level modeling to consider both geographic and demographic variables across the population – this helps understand the conundrum that while richer people are more likely to support Republican candidates and poorer people are more likely to vote for Democratic candidates, richer states on the country’s coasts usually support Democrats and, similarly, low-income areas in the center of the U.S. geographically generally lean Republican (Gelman, 2014). 
+
+Across applications in social science and policy research, probabilistic results from Bayesian methods are often more useful for policy decisions. If a frequentist evaluation of a policy finds no statistically significant effect of the program, it is possible that the Bayesian results could conclude that there is a specific numerical chance that the impact of the program is at least at a certain value, in the units of measurement for the metric at hand (Holzwart et al., 2018). This nuanced framework allows decision makers with flexibility to decide how much program success is suitable to their needs and identify which aspects are not operating as expected. These results also give room to conduct a stronger and more robust cost-benefit analysis, an important aspect of policy analysis. 
+
+
+### APPLICATION OF BAYESIAN REGRESSION METHODS:
+### Questions of Interest
+Using Bayesian regression methods, I will estimate the impact of child health outcomes, like BMI and BMI-for-age z-score, on academic performance, measured by test scores in math and verbal subjects. Equations 5 and 6 below show this. 
+
+TEST SCORES = α + β(BMI) + CONTROLS + ϵ, where i = 1,⋯,n     (5)
+
+TEST SCORES = α + β(BMI-for-Age Z Score) + CONTROLS + ϵ, where i = 1,⋯,n     (6)
+
+In the above equations, "CONTROLS" refers to the parameters that will be included in the model as covariates and their respective coefficients/posterior distributions. These covariates are chosen based on whether they are expected to make up some of the variation in test scores (outside of the variation explained by the various independent variables of interest). We do this so that we can isolate the impact of the independent variable of interest on test scores, the dependent variable. Controls that will be included are mainly socioeconomic and demographic variables, like wealth, region, child age, access to services, etc. 
+
+### Data Description
+I will apply Bayesian regression methods to data from the Young Lives Project, a 15-year study of the changing nature of childhood poverty in Ethiopia, India (Andhra Pradesh and Telangana), Peru and Vietnam. I will specifically use a constructed longitudinal data set from India, with data collected every few years from 2002 to 2016. As a part of the Young Lives research project in India, 1,000 children were sampled for the older cohort (aged 7.5 to 8.5 years old at the start of the study) and 2,000 children were sampled for the younger cohort (aged 6 to 18 months old at the start of the study). I will use the younger cohort data for this analysis. The sampling methodology in the dataset of interest is multi-stage and randomly sampled, considered to be nationally representative. The individuals and their households within each cohort were visited five times, comprising five total rounds of data collection per child. The attrition is low, estimated at approximately 1.5 percent across rounds. 
+
+I am  also curious as to how different, but relatively close sample sizes will impact the spread of the posterior distribution. Given that the younger cohort data set has approximately 2,000 students in it, I will test the relationship of interest on various groups of students (n = 100, 500, 1000, 2000) to see how estimates change. I will estimate the models on children sampled in Round 3, who were between the ages of 7.5 and 8.5 years old at the time of data collection in 2009.
+
+### Application of Methods
+It is important to consider how generalizable the results presented below are, and the type of inference we can make from the data at hand. Given that the data was sampled randomly and in multiple stages, we do consider it to be nationally representative. Therefore, with cautiousness, we can generalize the results to similar youth in India at the time of data collection. However, given that this application uses survey data that is observational and self-reported, we cannot assume causation between the variables of interest. The results presented are simply showing an association between variables in the data, but may be subject to biases from omitted variables and random error that was not captured in the analysis. 
+
+```{r load-packages, message = FALSE}
+library(sf) 
+library(tidyverse) 
+library(knitr) 
+library(readr)
+library(stringr)
+
+library(rstan)
+library(rstanarm)
+library(ggplot2)
+library(bayesplot)
+
+```
+
+```{r load-data, message = FALSE}
+younglives <- read_csv("projectdata.csv") 
+
+glimpse(younglives)
+
+```
+
+
+
+
+
+
+
+### Sources: 
+
+
