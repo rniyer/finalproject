@@ -23,6 +23,9 @@ In frequentist models of linear regression, like the one showed above, we are ab
 
 y ~ N(bX,o^2I)      (2)
 
+
+
+
 ### INTRODUCTION TO BAYESIAN THINKING AND METHODOLOGY:
 Before diving into the specifics of the Bayesian regression model, it is important to first understand the theory of conditional probabilities that it relies upon. Let us assume that there are two events, Event A and Event B. The probability that Event A occurs is p(A) and the probability that Event B occurs is p(B). If Event A’s occurrence is unrelated to Event B’s occurrence or non-occurrence, that means the two events are independent. In this case, the joint probability of both events occurring is equal to p(A and B) = p(A)*p(B). 
 
@@ -52,6 +55,9 @@ Testing for significance also varies across frequentist and Bayesian methodologi
 
 P-values, derived from the frequentist approach, are commonly used in the social science and policy evaluation space. They are often used to inform policy decision-making as well. However, many researchers and officials from the American Statistical Association (ASA) caution that use of p-values can often lead to misinterpretation and misinformation (ASA, 2016; Holzwart et al., 2018). Rather, social science research is increasingly moving toward Bayesian techniques (as an alternative to relying on the p-value approach) to quantify the importance of findings through the use of inference from probabilities. 
 
+
+
+
 ### BAYESIAN METHODOLOGY IN PUBLIC POLICY:
 Bayesian regression can be a particularly interesting method to use to address public policy issues because of its ability to take into account prior information about the parameters of interest. Many policy problems are multi-faceted and evolve over time - as such, a single policy dataset is unlikely to be representative of all relevant information to the question at hand. Additionally, most policy solutions have nuance and may work differently across contexts. This dependence on context makes it hard to simply rely on point estimates as a meaningful way to design policy. For this reason, Bayesian methods that allow for the estimation of a posterior distribution, rather than a point estimate, can offer more to policymakers in terms of projected impact of a policy option. 
 
@@ -73,6 +79,8 @@ Outside of government, many research organizations and universities have applied
 Across applications in social science and policy research, probabilistic results from Bayesian methods are often more useful for policy decisions. If a frequentist evaluation of a policy finds no statistically significant effect of the program, it is possible that the Bayesian results could conclude that there is a specific numerical chance that the impact of the program is at least at a certain value, in the units of measurement for the metric at hand (Holzwart et al., 2018). This nuanced framework allows decision makers with flexibility to decide how much program success is suitable to their needs and identify which aspects are not operating as expected. These results also give room to conduct a stronger and more robust cost-benefit analysis, an important aspect of policy analysis. 
 
 
+
+
 ### APPLICATION OF BAYESIAN REGRESSION METHODS:
 ### Questions of Interest
 Using Bayesian regression methods, I will estimate the impact of child health outcomes, like BMI and BMI-for-age z-score, on academic performance, measured by test scores in math and verbal subjects. Equations 5 and 6 below show this. 
@@ -88,9 +96,8 @@ I will apply Bayesian regression methods to data from the Young Lives Project, a
 
 I am  also curious as to how different, but relatively close sample sizes will impact the spread of the posterior distribution. Given that the younger cohort data set has approximately 2,000 students in it, I will test the relationship of interest on various groups of students (n = 100, 500, 1000, 2000) to see how estimates change. I will estimate the models on children sampled in Round 3, who were between the ages of 7.5 and 8.5 years old at the time of data collection in 2009.
 
-### Application of Methods
-It is important to consider how generalizable the results presented below are, and the type of inference we can make from the data at hand. Given that the data was sampled randomly and in multiple stages, we do consider it to be nationally representative. Therefore, with cautiousness, we can generalize the results to similar youth in India at the time of data collection. However, given that this application uses survey data that is observational and self-reported, we cannot assume causation between the variables of interest. The results presented are simply showing an association between variables in the data, but may be subject to biases from omitted variables and random error that was not captured in the analysis. 
-
+### Initial Descriptive Statistics and Analysis
+The below code first loads packages that will be useful for the analysis.
 ```{r load-packages, message = FALSE}
 library(sf) 
 library(tidyverse) 
@@ -105,16 +112,140 @@ library(bayesplot)
 
 ```
 
+Next, we load the data and look at summary statistics for each variable included. We have two independent variables of interest - BMI and BMI-for-Age Z Score. We also have two outcome variables of interest, test scores on the Peabody Picture Vocabulary Test (PPVT) and a grade-level Math Test. The PPVT is a test designed for all ages that measures both listening and comprehension of single-word vocabulary using both verbal and non-verbal assessment mechanisms. The math tests used in this analysis are at grade-level, and questions asked vary across rounds of data collection. All test scores used this in analysis are standardized using the Rasch method, which removes observations with poor psychometric results and uses Item Response Theory to account for individual child abilities and question difficulty. In Round 3, the researchers whom collected the data standardized all Rasch scores to have an approximate mean of 300 and standard deviation of 15. This information is shown in the summary statistics below, which also shows information on the various control variables of interest that will be used in the analysis. 
+
 ```{r load-data, message = FALSE}
 younglives <- read_csv("projectdata.csv") 
 
-glimpse(younglives)
+summary(younglives)
 
 ```
 
+It is important to consider how generalizable the results presented below are, and the type of inference we can make from the data at hand. Since the data was sampled randomly and in multiple stages, we do consider it to be nationally representative. Therefore, with cautiousness, we can generalize the results to similar youth in India at the time of data collection. However, given that this application uses survey data that is observational and self-reported, we cannot assume causation between the variables of interest. The results presented are simply showing an association between variables in the data, but may be subject to biases from omitted variables and random error that was not captured in the analysis. 
+
+Before diving into the regression analysis, we will take a better look at the The scatter plots below show the various relationships between the independent and dependent variables of interest. Note that these relationships may not hold once we start linear regression, due to controlling for factors that make up the variation in the outcome variables. 
+
+```{r scatter-bmi, message = FALSE}
+ggplot(data = younglives, 
+       mapping = aes(x= bmi_r3, 
+                     y= zbfa_r3)) +
+  geom_point(size = 0.4, color = "green") +
+  scale_x_continuous(limits = c(10, 24), breaks = c(10, 14, 18, 22)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title=element_blank()) +
+  labs(title =
+         paste("BMI and BMI-for-Age Z-Scores are positively correlated, as expected"),
+       caption = "Source: Young Lives Survey, 2009",
+       x = "Body Mass Index (BMI)",
+       y = "BMI-for-Age Z-Score")
+
+```
+
+As expected, the above scatter plot shows that our two indepdendent variables of interest, BMI and BMI-for-Age Z Score, are positively correlated. The below plots show that verbal and math scores are also positively correlated, although it seems slightly weaker. This implies that as children perform better in math, they also perform better on the PPVT score. We can infer that changes to academic performance are not necessarily only seen in certain subjects, but across subjects in school.
+
+```{r scatter-scores, message = FALSE}
+# Test scores across subjects
+ggplot(data = younglives, 
+       mapping = aes(x=r3ppvt_corrected_rasch, 
+                     y=r3math_corrected_rasch)) +
+  geom_point(size = 0.4, color = "blue") +
+  scale_x_continuous(limits = c(260, 340), breaks = c(260, 280, 300, 320, 340)) +
+  scale_y_continuous(limits = c(270, 330), breaks = c(270, 290, 310, 330)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title=element_blank()) +
+  labs(title =
+         paste("Test scores in verbal, math subjects have a positive, but slightly weak correlation"),
+       caption = "Source: Young Lives Survey, 2009",
+       x = "PPVT Rasch Score",
+       y = "Math Test Rasch Score")
+
+```
+
+The scatter plots below show the basic relationship between BMI and child test scores in both PPVT and math subjects. Across both subjects, we do not find that there is a strong correlation with BMI. This is a bit surprising, but raises the importance of using Bayesian techniques to see if there is a probability of interest in this relationship. 
+
+```{r scatter-bmiscores, message = FALSE}
+# BMI and PPVT test score
+ggplot(data = younglives, 
+       mapping = aes(x=bmi_r3, 
+                     y=r3ppvt_corrected_rasch)) +
+  geom_point(size = 0.4, color = "orange") +
+  scale_y_continuous(limits = c(260, 340), breaks = c(260, 280, 300, 320, 340)) +
+  scale_x_continuous(limits = c(10, 18), breaks = c(10, 14, 18)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title=element_blank()) +
+  labs(title =
+         paste("Child PPVT test scores have little to no correlation with Body Mass Index"),
+       caption = "Source: Young Lives Survey, 2009",
+       x = "Body Mass Index",
+       y = "PPVT Rasch Score")
 
 
+# BMI and Math test score
+ggplot(data = younglives, 
+       mapping = aes(x=bmi_r3, 
+                     y=r3math_corrected_rasch)) +
+  geom_point(size = 0.4, color = "purple") +
+  scale_y_continuous(limits = c(270, 330), breaks = c(270, 290, 310, 330)) +
+  scale_x_continuous(limits = c(10, 18), breaks = c(10, 14, 18)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title=element_blank()) +
+  labs(title =
+         paste("Child math test scores have little to no correlation with Body Mass Index"),
+       caption = "Source: Young Lives Survey, 2009",
+       x = "Body Mass Index",
+       y = "Math Test Rasch Score")
 
+```
+
+The first histogram below shows the distribution of the BMI variable, which is slightly right skewed. According to the National Institutes of Health, a BMI of below 18.5 indicates that a person is underweight. We see that the vast majority of children in this sample are considered underweight by this definition, which isn't entirely surprising due to the context of the study looking at childhood poverty in a primarily rural and developing region of the world. The mean BMI seems to be just below 14, which is very low. 
+
+The second histogram below shows the distribution of the BMI-for-Age Z-Scores for the children. Again, we see that the majority of the sample is below the average BMI for the age group, shown on the histogram as 0. This distribution is slightly left skewed. 
+
+```{r histo-bmi, fig.width=9, fig.height=3, message = FALSE}
+ggplot(younglives, aes(x = bmi_r3)) + 
+  geom_histogram(fill="lightgreen", alpha = 0.7) +
+  theme_bw() +
+  scale_x_continuous(limits = c(10, 20), breaks = c(10, 12, 14, 16, 18, 20)) +
+  labs(x = "Body Mass Index", 
+       y= "Count", 
+       title = "Distribution of Body Mass Index for Children between 7.5 and 8.5 years old",
+       caption = "Source: Young Lives Survey, 2009")
+
+ggplot(younglives, aes(x = zbfa_r3)) + 
+  geom_histogram(fill="orange", alpha = 0.7) +
+  theme_bw() +
+  scale_x_continuous(limits = c(-10, 5), breaks = c(-10, -5, 0, 5)) +
+  labs(x = "BMI-for-Age Z-Score",
+       y= "Count", 
+       title = "Distribution of Body Mass Index-for-Age Z-Scores for Children between 7.5 and 8.5 years old",
+       caption = "Source: Young Lives Survey, 2009")
+
+```
+
+The first histogram below shows the distribution of the PPVT scores variable, which is slightly left skewed. It resembles a normal distribution otherwise. The second histogram shows the distribution of the Math test scores variable, which is much less uniform and seems to have the highest count at a score of 300. There seems to be a lot more variability in the math score distribution than that of the verbal test. 
+
+```{r histo-scores, fig.width=9, fig.height=3, message = FALSE}
+ggplot(younglives, aes(x = r3ppvt_corrected_rasch)) + 
+  geom_histogram(fill="yellow", alpha = 0.7) +
+  theme_bw() +
+  labs(x = "PPVT Rasch Scores", 
+       y= "Count", 
+       title = "Distribution of PPVT Rasch Scores for Children between 7.5 and 8.5 years old",
+       caption = "Source: Young Lives Survey, 2009")
+
+ggplot(younglives, aes(x = r3math_corrected_rasch)) + 
+  geom_histogram(fill="blue", alpha = 0.7) +
+  theme_bw() +
+  labs(x = "Math Test Rasch Score",
+       y= "Count", 
+       title = "Distribution of Math Test Rasch Scores for Children between 7.5 and 8.5 years old",
+       caption = "Source: Young Lives Survey, 2009")
+
+```
 
 
 
