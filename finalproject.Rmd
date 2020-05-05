@@ -1,5 +1,5 @@
 ---
-title: "Final Project"
+title: "Final Project: Bayesian Methodology and Inferential Applications to Public Policy"
 author: "Ritika Iyer"
 date: "5/6/2020"
 output:
@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
+This paper will introduce Bayesian methodology as a way of answering inferential questions in the public policy space. It will start by giving an overview of linear regression, covering both frequentist and Bayesian frameworks. The next sections will compare and contrast frequentist and Bayesian models, drawing extensively from the literature to discuss the benefits and shortcomings of each type. I then hope to make the case as to why Bayesian methodology is particularly useful and relevant to informing public policy decisions, as compared to other methodologies. I provide real-world examples of Bayesian applications in the public domain from government, research organizations, and universities. The final section of this paper applies Bayesian inferential analysis to a simple policy question in the interational development space. This analysis uses childhood poverty data from eastern India to understand the relationship between child health status (measured by Body Mass Index, or BMI) and academic performance (measured by test scores). The application component of this paper includes descriptive statistics, Bayesian inference and Markov Chain Monte Carlo sampling methodology, posterior distribution checks and inferential analysis. It ends with a comparison of results from the Bayesian methodology versus a frequentist methodology and 
 
 Regression methods are useful for estimating a relationship between two variables, x and y. Here, we treat x as the independent variable that has an estimated impact, measured through the regression method, on our dependent or outcome variable y. In bivariate regression models, x and y are the only relevant variables included, an the estimated impact of x on y is found in the 'coefficient' on the x-term. Equation 1 below shows an example of a bivariate model between x and y, where b is the coefficient that tells us the estimated impact of an increase in x on y (Koehrsen, 2018). The error term, e, represents all other effects of variables that are not listed in the model.
 
@@ -19,10 +20,7 @@ y = a + b(x) + e     (1)
 
 However, bivariate models are most often subject to omitted variable bias, an issue that arises when additional variables that have an impact on y are not included in the model. Omitted variable bias results in a biased coefficient on x, or a biased b estimate. For this reason, multivariate models that include several x's rather than just the one of interest are generally preferred. 
 
-In frequentist models of linear regression, like the one showed above, we are able to obtain point estimates of the relationship of interest. This paper will focus on another type of regression, Bayesian Linear Regression. The Bayesian method of regression estimates probability distributions rather than point estimates (Clyde et al., 2020). Using a similar framework introduced in Equation 1 above, the Bayesian linear regression model estimates a distribution of outcomes for the output y sampled from a normal distribution of the x's included (Koehrsen, 2018). Equation 2 below shows an example of this. 
-
-y ~ N(bX,o^2I)      (2)
-
+In frequentist models of linear regression, like the one showed above, we are able to obtain point estimates of the relationship of interest. This paper will focus on another type of regression, Bayesian Linear Regression. The Bayesian method of regression estimates probability distributions rather than point estimates (Clyde et al., 2020). Using a similar framework introduced in Equation 1 above, the Bayesian linear regression model estimates a distribution of outcomes for the output y sampled from a normal distribution of the x's included (Koehrsen, 2018). 
 
 
 
@@ -34,13 +32,13 @@ However, if Event A’s occurrence is conditional upon Event B’s occurrence, t
 We can use the concepts of joint and conditional probabilities to derive the Bayes theorem, which is p(A/B) = p(A)*p(B/A) / p(B). This equation is interpreted as the probability of Event A occurring given that Event B has occurred is equal to the unconditional probability of Event A occurring times the conditional probability of Event B occurring given that Event A has occurred, divided by the simple unconditional probability of Event B occurring (Inzaugarat, 2018).
 
 ### Bayesian Linear Regression
-As discussed above, the main goal of Bayesian Linear Regression is to determine the posterior distribution for the parameters in the model of interest. This is in contrast to frequentist regression models that seek to estimate a single value for each parameter that is considered the best estimate (Koehrsen, 2018). In Bayesian models, the posterior probability of the parameters of interest are conditional upon prior probabilities of their inputs and outputs (Clyde et al., 2020). Equation 3 below shows the fundamental expression of Bayes Theorem, which underlies the Bayesian regression method (Clyde et al., 2020). 
+As discussed above, the main goal of Bayesian Linear Regression is to determine the posterior distribution for the parameters in the model of interest. This is in contrast to frequentist regression models that seek to estimate a single value for each parameter that is considered the best estimate (Koehrsen, 2018). In Bayesian models, the posterior probability of the parameters of interest are conditional upon prior probabilities of their inputs and outputs (Clyde et al., 2020). Equation 2 below shows the fundamental expression of Bayes Theorem, which underlies the Bayesian regression method (Clyde et al., 2020). 
 
-Posterior = (Likelihood * Prior) / Normalization      (3)
+Posterior = (Likelihood * Prior) / Normalization      (2)
 
-In words, we can interpret Equation 3 as the following: the posterior distribution generated from a Bayesian regression model for the parameters is proportional to the likelihood of the parameters data times the prior probability of those parameters (Koehrsen, 2018). Equation 4 below shows how we would start with a Bayesian mode, which assumes that the error term is independent and distributed as normal random variables are (Koehrsen, 2018). 
+In words, we can interpret Equation 2 as the following: the posterior distribution generated from a Bayesian regression model for the parameters is proportional to the likelihood of the parameters data times the prior probability of those parameters (Koehrsen, 2018). Equation 3 below shows how we would start with a Bayesian mode, which assumes that the error term is independent and distributed as normal random variables are (Koehrsen, 2018). 
 
-y = α + βx + ϵ, i = 1,⋯,n     (4)
+y = α + βx + ϵ, i = 1,⋯,n     (3)
 
 We can apply the Bayes theorem and probability framework discussed previously to Bayesian regression models, particularly around updating the probability of a hypothesis occurring upon having new data to incorporate in the model (Inzaugarat, 2018). Going back to the Event A and Event B world, we see that the prior, or the probability of the hypothesis before seeing the data, is equal to p(A). The conditional probability of Event A given Event B, or p(A/B), is what we are trying to estimate – the probability of the hypothesis after we see our data, the posterior distribution. The opposite conditional probability of Event B given Event A’s occurrence, equal to p(B/A), is the probability of the data given the hypothesis, or the likelihood estimation. Finally, the simple probability of Event B, p(B), can also be interpreted as the probability of the data under any hypothesis. This probability is also called the normalizing constant under a Bayesian framework (Inzaugarat, 2018).
 
@@ -83,11 +81,11 @@ Across applications in social science and policy research, probabilistic results
 
 ### APPLICATION OF BAYESIAN REGRESSION METHODS:
 ### Questions of Interest
-Using Bayesian regression methods, I will estimate the impact of child health outcomes, like BMI and BMI-for-age z-score, on academic performance, measured by test scores in math and verbal subjects. Equations 5 and 6 below show this. 
+Using Bayesian regression methods, I will estimate the impact of child health outcomes, like BMI and BMI-for-age z-score, on academic performance, measured by test scores in math and verbal subjects. Equations 4 and 5 below show this. 
 
-TEST SCORES = α + β(BMI) + CONTROLS + ϵ, where i = 1,⋯,n     (5)
+TEST SCORES = α + β(BMI) + CONTROLS + ϵ, where i = 1,⋯,n     (4)
 
-TEST SCORES = α + β(BMI-for-Age Z Score) + CONTROLS + ϵ, where i = 1,⋯,n     (6)
+TEST SCORES = α + β(BMI-for-Age Z Score) + CONTROLS + ϵ, where i = 1,⋯,n     (5)
 
 In the above equations, "CONTROLS" refers to the parameters that will be included in the model as covariates and their respective coefficients/posterior distributions. These covariates are chosen based on whether they are expected to make up some of the variation in test scores (outside of the variation explained by the various independent variables of interest). We do this so that we can isolate the impact of the independent variable of interest on test scores, the dependent variable. Controls that will be included are mainly socioeconomic and demographic variables, like wealth, region, child age, access to services, etc. 
 
@@ -143,7 +141,7 @@ ggplot(data = younglives,
 
 ```
 
-As expected, the above scatter plot shows that our two indepdendent variables of interest, BMI and BMI-for-Age Z Score, are positively correlated. The below plots show that verbal and math scores are also positively correlated, although it seems slightly weaker. This implies that as children perform better in math, they also perform better on the PPVT score. We can infer that changes to academic performance are not necessarily only seen in certain subjects, but across subjects in school.
+As expected, the above scatter plot shows that our two indepdendent variables of interest, BMI and BMI-for-Age Z Score, are positively correlated. This might help us The below plots show that verbal and math scores are also positively correlated, although it seems slightly weaker. This implies that as children perform better in math, they also perform better on the PPVT score. We can infer that changes to academic performance are not necessarily only seen in certain subjects, but across subjects in school.
 
 ```{r scatter-scores, message = FALSE}
 # Test scores across subjects
@@ -254,9 +252,9 @@ There are four main steps involved in a Bayesian inferential analysis, as outlin
 
 Firstly, we must specify the probability model, which is based on the likelhood of the observed data and the specified priors. We expect that the priors are the main differentiating factors between the Bayesian and Frequentist results, since the likelihood is based on the outcome and often will not vary across model types (James, 2019). For the purpose of this analysis, we will use default prior distributions from the rstanarm package in R. The Stan general package is a probability-based language specifically used for Bayesian statistical inference (Stan, 2020). 
 
-For this analysis, we will use a linear regression model where the outcome y, PPVT test score, is normal given the covariate of interest, BMI, and the control variables. We also assume that the linear model has independent errors. These assumptions imply that the posterior distribution will have multiple parameters, one associated with each covariate, a constant, and an error term. Again, these parameters will be estimated using default priors from the rstanarm package, which helps determine the probability model of interest. As discussed previously and based on the descriptive statistics, the model we are attempting to estimate is in Equation 7 below. For this initial analysis, we will use all children sampled in the dataset (approximately 2,000 children).
+For this analysis, we will use a linear regression model where the outcome y, PPVT test score, is normal given the covariate of interest, BMI, and the control variables. We also assume that the linear model has independent errors. These assumptions imply that the posterior distribution will have multiple parameters, one associated with each covariate, a constant, and an error term. Again, these parameters will be estimated using default priors from the rstanarm package, which helps determine the probability model of interest. As discussed previously and based on the descriptive statistics, the model we are attempting to estimate is in Equation 6 below. For this initial analysis, we will use all children sampled in the dataset (approximately 2,000 children).
 
-PPVT TEST SCORE = α + β(BMI) + β1(WEALTH INDEX) + β2(CHILDAGE) + β3(FEMALE) + β4(HH SIZE) + β5(TOTAL MONTHLY EXPENDITURE) + β6(RURAL) + ϵ, where i = 1,⋯,n     (7)
+PPVT TEST SCORE = α + β(BMI) + β1(WEALTH INDEX) + β2(CHILDAGE) + β3(FEMALE) + β4(HH SIZE) + β5(TOTAL MONTHLY EXPENDITURE) + β6(RURAL) + ϵ, where i = 1,⋯,n     (6)
 
 Given the above model specification, the next step is to draw samples from the posterior distribution (James, 2019). This process gives us an updated distribution of each parameter based on the data we have. The default method that the Stan package uses is the Markov Chain Monte Carlo (MCMC) method, which improves the model search efficiency to obtain the samples. The code for this model is shown below. 
 
@@ -283,12 +281,45 @@ summary(ppvtbayes)
 
 The below graph allows us to understand the predictive strength of the posterior distribution estimated from the model. This is helpful because if our model is a good fit to the predicted distributions, then we can use it to create data that is similar to the observed data. In the graph below, the dark blue line shows the observed data for the PPVT Rasch scores. It is slightly higher and to the left of the light blue lines, which show simulated data from the posterior distribution estimated from the model. 
 
-```{r bayesmodel-posterior, message = FALSE}
+```{r bayesmodel-posteriorcheck, message = FALSE}
 pp_check(ppvtbayes)
 
 ```
 
-Now that we understand the posterior model and are confident that the MCMC sampling methodology worked 
+Now that we understand the posterior model and are confident that the MCMC sampling methodology worked based on the above checks, we can use the model to infer about the relationship of interest between child health status (captured by child BMI) and academic performance (measured by standardized test scores on the PPVT). The below histogram shows the posterior sample estimations of child BMI. We see that the distribution ranges mostly between 0.5 and 1.5, with a relatively uniform center around 1.0. 
+
+```{r bayesmodel-bmihisto, message = FALSE}
+stan_hist(ppvtbayes, pars=c("bmi_r3"), bins=50)
+
+```
+
+The posterior sample also provides an estimate of the average score change with a one unit increase in child BMI and a 95 percent confidence interval, as shown by the parameter on BMI below. The summary of the posterior distribution for BMI shows that a one unit increase in child BMI is associated with an approximate 1.01 score point increase on the PPVT Rasch test, on average. The confidence interval estimation tells us that there is a 95 percent probability that a one unit increase in a child's BMI is associated with an improvement in their PPVT Rasch test performance in the range of approximately 0.63 and 1.4 points. This finding confirms a slight positive correlation between BMI and student test performance, which is different frm what we found previously in the descriptive analysis. 
+
+```{r bayesmodel-posterior, message = FALSE}
+posterior_bmi <- as.data.frame(ppvtbayes, pars=c("bmi_r3"))[,"bmi_r3"]
+mean_bmi <- mean(posterior_bmi)
+ci_bmi <- quantile(posterior_bmi, probs=c(0.05, 0.95)) 
+
+summary(posterior_bmi)
+mean_bmi
+ci_bmi
+
+```
+
+The code below uses the posterior distribution to estimate the probability that the change in PPVT Rasch test scores associated with a one unit change in BMI is greater than 1 point. It is helpful, particularly for policy problems, to use probabilities to identify a relevant threshold for the relationship of interest. These results could inform policy design or improve targeting of a program to increase odds of success in impacting the outcome of interest to a pre-determined degree. 
+
+The results tell us that there is an approxiamte 0.52 probability that a one unit increase in BMI will be associated with an increase in test scores of over 1 point. 
+
+```{r bayesmodel-posteriortwo, message = FALSE}
+mean_bmi2 <- mean(posterior_bmi > 1.0)
+
+mean_bmi2
+
+```
+
+
+### Frequentist Inference, for comparison 
+
 
 
 ### Sources: 
