@@ -274,7 +274,7 @@ stan_trace(ppvtbayes, pars=c("(Intercept)","bmi_r3","sigma"))
 
 ```
 
-The next check for the MCMC sampling methodolgy is the R-hat estimator of variance, which also helps monitor convergence across the chains (James, 2019). This is shown below using the simple summary command on the model. We see that the R-hat values for each parameter equals 1, implying convergence. There are a few other relevant findings from the model summary that will be discussed later on in this paper. 
+The next check for the MCMC sampling methodolgy is the R-hat estimator of variance, which also helps monitor convergence across the chains (James, 2019). This is shown below using the simple summary command on the model, under the 'MCMC Diagnostics' section of the output. We see that the R-hat values for each parameter equals 1, implying convergence. There are a few other relevant findings from the model summary that will be discussed later on in this paper. 
 
 ```{r bayesmodel-rhat, message = FALSE}
 summary(ppvtbayes)
