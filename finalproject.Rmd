@@ -1,7 +1,7 @@
 ---
 title: "Final Project"
 author: "Ritika Iyer"
-date: "4/26/2020"
+date: "5/6/2020"
 output:
   html_document: default
   pdf_document: default
@@ -227,7 +227,7 @@ ggplot(younglives, aes(x = zbfa_r3)) +
 
 ```
 
-The first histogram below shows the distribution of the PPVT scores variable, which is slightly left skewed. It resembles a normal distribution otherwise. The second histogram shows the distribution of the Math test scores variable, which is much less uniform and seems to have the highest count at a score of 300. There seems to be a lot more variability in the math score distribution than that of the verbal test. 
+The first histogram below shows the distribution of the PPVT scores variable, which is slightly left skewed. It resembles a normal distribution otherwise. The second histogram shows the distribution of the Math test scores variable, which is much less uniform and seems to have the highest count at a score of 300. There seems to be a lot more variability in the math score distribution than that of the verbal test. For this reason, we will move forward with the PPVT score for the outcome variable of interest in the inferential analysis.
 
 ```{r histo-scores, fig.width=9, fig.height=3, message = FALSE}
 ggplot(younglives, aes(x = r3ppvt_corrected_rasch)) + 
@@ -252,19 +252,43 @@ ggplot(younglives, aes(x = r3math_corrected_rasch)) +
 ### Bayesian Inference 
 There are four main steps involved in a Bayesian inferential analysis, as outlined below. 
 
-Firstly, we must specify the probability model, which is based on the likelhood of the observed data and the specified priors. We expect that the priors are the main differentiating factors between the Bayesian and Frequentist results, since the likelihood is based on the outcome and often will not vary across model types (James, 2019). For the purpose of this analysis, we will use default prior distributions from the rstanarm package in R. The Stan general package is a probability-based language specifically used for Bayesian statistical inference (Stan, 2020). For this analysis, we will use a linear regression model where the outcome y, PPVT test score, is normal given the covariate of interest, BMI, and the control variables. We also assume that the linear model has independent errors. These assumptions imply that the posterior distribution will have multiple parameters, one associated with each covariate, a constant, and an error term. Again, these parameters will be estimated using default priors from the rstanarm package, which helps determine the probability model of interest. As discussed previously and based on the descriptive statistics, the model we are attempting to estimate is in Equation 7 below. 
+Firstly, we must specify the probability model, which is based on the likelhood of the observed data and the specified priors. We expect that the priors are the main differentiating factors between the Bayesian and Frequentist results, since the likelihood is based on the outcome and often will not vary across model types (James, 2019). For the purpose of this analysis, we will use default prior distributions from the rstanarm package in R. The Stan general package is a probability-based language specifically used for Bayesian statistical inference (Stan, 2020). 
+
+For this analysis, we will use a linear regression model where the outcome y, PPVT test score, is normal given the covariate of interest, BMI, and the control variables. We also assume that the linear model has independent errors. These assumptions imply that the posterior distribution will have multiple parameters, one associated with each covariate, a constant, and an error term. Again, these parameters will be estimated using default priors from the rstanarm package, which helps determine the probability model of interest. As discussed previously and based on the descriptive statistics, the model we are attempting to estimate is in Equation 7 below. For this initial analysis, we will use all children sampled in the dataset (approximately 2,000 children).
 
 PPVT TEST SCORE = α + β(BMI) + β1(WEALTH INDEX) + β2(CHILDAGE) + β3(FEMALE) + β4(HH SIZE) + β5(TOTAL MONTHLY EXPENDITURE) + β6(RURAL) + ϵ, where i = 1,⋯,n     (7)
 
-Given the above model specification, the next step is to draw samples form the posterior distribution (James, 2019). This process gives us an updated distribution of each parameter based on the data we have. The default method that the Stan package uses is the Markov Chain Monte Carlo (MCMC) method, which improves the model search efficiency to obtain the samples. The code for this model is shown below. 
+Given the above model specification, the next step is to draw samples from the posterior distribution (James, 2019). This process gives us an updated distribution of each parameter based on the data we have. The default method that the Stan package uses is the Markov Chain Monte Carlo (MCMC) method, which improves the model search efficiency to obtain the samples. The code for this model is shown below. 
 
 ```{r bayesmodel-ppvt, message = FALSE}
 ppvtbayes <- stan_glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives, family = gaussian)
 
 ```
 
-The next step in the Bayesian inference process is to evaluate the model to ensure that the MCMC methodology of sampling is working (James, 2019). 
+The next step in the Bayesian inference process is to evaluate the model to ensure that the MCMC methodology of sampling is working (James, 2019). There are two checks - using trace plots and estimating R-hat - to assess the effectiveness of the MCMC sampler (James, 2019). A trace, or time-series, plot shows different values of a parameter over time (i.e., across sampled chains) (AMOS Development, 2020). In other words, we can use a trace plot to see when the sampling converges to the distribution and moves away from its priors.  
 
+The trace plot shown below takes several sequential draws from the posterior distribution. We see that each chain sampled from the MCMC methodology is centered around a value, although there is some more volatility in terms of extremes across all charts. The first plot shows the Intercept, or the baseline PPVT Rasch score if all other parts of the model are equal to 0. It seems to center just above 230. The middle graph shows the BMI, which centers around 1.0. The sigma chart chains center between 13.5 and 14.0. They are all centered around a single value, which implies stability and proper mixing across chains, since they are often overlapping (James, 2019). Additionally, across all of these charts, we see vertical variation, but no long-term trend over time. We might expect that if our sample was much larger, comprised of 100,000 children, the trace plot might have much less volatility and look more squeezed together (AMOS Development, 2020).
+
+```{r bayesmodel-trace, message = FALSE}
+stan_trace(ppvtbayes, pars=c("(Intercept)","bmi_r3","sigma"))
+
+```
+
+The next check for the MCMC sampling methodolgy is the R-hat estimator of variance, which also helps monitor convergence across the chains (James, 2019). This is shown below using the simple summary command on the model. We see that the R-hat values for each parameter equals 1, implying convergence. There are a few other relevant findings from the model summary that will be discussed later on in this paper. 
+
+```{r bayesmodel-rhat, message = FALSE}
+summary(ppvtbayes)
+
+```
+
+The below graph allows us to understand the predictive strength of the posterior distribution estimated from the model. This is helpful because if our model is a good fit to the predicted distributions, then we can use it to create data that is similar to the observed data. In the graph below, the dark blue line shows the observed data for the PPVT Rasch scores. It is slightly higher and to the left of the light blue lines, which show simulated data from the posterior distribution estimated from the model. 
+
+```{r bayesmodel-posterior, message = FALSE}
+pp_check(ppvtbayes)
+
+```
+
+Now that we understand the posterior model and are confident that the MCMC sampling methodology worked 
 
 
 ### Sources: 
