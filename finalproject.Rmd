@@ -263,9 +263,16 @@ ppvtbayes <- stan_glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3
 
 ```
 
+The below code gives us more information on the default priors used by the rstanarm function. The default is a normal distribtuion for the intercept and coefficient priors. The intercept prior is centered around 0 but has a higher vertical variance than the priors for the coefficients do. An exponential distribution is used as a prior for the error term. 
+
+```{r defaultpriors, message = FALSE}
+prior_summary(ppvtbayes)
+
+```
+
 The next step in the Bayesian inference process is to evaluate the model to ensure that the MCMC methodology of sampling is working (James, 2019). There are two checks - using trace plots and estimating R-hat - to assess the effectiveness of the MCMC sampler (James, 2019). A trace, or time-series, plot shows different values of a parameter over time (i.e., across sampled chains) (AMOS Development, 2020). In other words, we can use a trace plot to see when the sampling converges to the distribution and moves away from its priors.  
 
-The trace plot shown below takes several sequential draws from the posterior distribution. We see that each chain sampled from the MCMC methodology is centered around a value, although there is some more volatility in terms of extremes across all charts. The first plot shows the Intercept, or the baseline PPVT Rasch score if all other parts of the model are equal to 0. It seems to center just above 230. The middle graph shows the BMI, which centers around 1.0. The sigma chart chains center between 13.5 and 14.0. They are all centered around a single value, which implies stability and proper mixing across chains, since they are often overlapping (James, 2019). Additionally, across all of these charts, we see vertical variation, but no long-term trend over time. We might expect that if our sample was much larger, comprised of 100,000 children, the trace plot might have much less volatility and look more squeezed together (AMOS Development, 2020).
+The trace plot shown below takes several sequential draws from the posterior distribution (James, 2019). We see that each chain sampled from the MCMC methodology is centered around a value, although there is some more volatility in terms of extremes across all charts. The first plot shows the Intercept, or the baseline PPVT Rasch score if all other parts of the model are equal to 0. It seems to center just above 230. The middle graph shows the BMI, which centers around 1.0. The sigma chart chains center between 13.5 and 14.0. They are all centered around a single value, which implies stability and proper mixing across chains, since they are often overlapping (James, 2019). Additionally, across all of these charts, we see vertical variation, but no long-term trend over time. We might expect that if our sample was much larger, comprised of 100,000 children, the trace plot might have much less volatility and look more squeezed together (AMOS Development, 2020).
 
 ```{r bayesmodel-trace, message = FALSE}
 stan_trace(ppvtbayes, pars=c("(Intercept)","bmi_r3","sigma"))
@@ -279,7 +286,7 @@ summary(ppvtbayes)
 
 ```
 
-The below graph allows us to understand the predictive strength of the posterior distribution estimated from the model. This is helpful because if our model is a good fit to the predicted distributions, then we can use it to create data that is similar to the observed data. In the graph below, the dark blue line shows the observed data for the PPVT Rasch scores. It is slightly higher and to the left of the light blue lines, which show simulated data from the posterior distribution estimated from the model. 
+The below graph allows us to understand the predictive strength of the posterior distribution estimated from the model. This is helpful because if our model is a good fit to the predicted distributions, then we can use it to create data that is similar to the observed data (James, 2019). In the graph below, the dark blue line shows the observed data for the PPVT Rasch scores. It is slightly higher and to the left of the light blue lines, which show simulated data from the posterior distribution estimated from the model. 
 
 ```{r bayesmodel-posteriorcheck, message = FALSE}
 pp_check(ppvtbayes)
@@ -317,8 +324,30 @@ mean_bmi2
 
 ```
 
+The plots below show the importance of the priors in determining the posterior distribution discussed above. The intervals plotted next to each other show that the posterior distribution mean estimate for each value - Intercept, BMI, and error - is slightly above that of the prior Future analysis could use these plots to identify a more informative prior and adapt the model using a new variance and slope accordingly (James, 2019). 
+
+```{r bayesmodel-priorstwo, message = FALSE}
+posterior_vs_prior(ppvtbayes, group_by_parameter = TRUE, pars=c("(Intercept)"))
+
+posterior_vs_prior(ppvtbayes, group_by_parameter = TRUE, pars=c("bmi_r3"))
+
+posterior_vs_prior(ppvtbayes, group_by_parameter = TRUE, pars=c("sigma"))
+
+```
 
 ### Frequentist Inference, for comparison 
+Next, we will compare the Bayesian results to those of a Frequentist method, using the same data. The below code builds the frequentist linear regression model and calculates the likelihood estimates for comparison. We find that the maximum likelihood estimations of the intercept is equal to approximately 233.2 points, which is very close to the estimation from the Bayesian methodology of 233.1 points. The BMI estimation from the frequentist methodology shown below is equal to 1.012, which is also very close to the mean BMI estimation from the posterior distrbution, equal to 1.013, of the Bayes model. 
+
+```{r frequentistmodel-ppvt, message = FALSE}
+ppvtfrequentist <- glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives, family = gaussian)
+
+summary(ppvtfrequentist)
+
+```
+
+These estimates across methodologies are likely close because of the dataset's relatively large sample size - as you will recall from previous sections, Bayesian estimates resemble OLS estimates as the sample size gets larger. Therefore, the importance of the priors decreases as the sample size n increases. 
+
+
 
 
 
