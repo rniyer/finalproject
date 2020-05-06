@@ -18,7 +18,7 @@ This paper will introduce Bayesian methodology as a way of answering inferential
 
 Regression methods are useful for estimating a relationship between two variables, x and y. Here, we treat x as the independent variable that has an estimated impact, measured through the regression method, on our dependent or outcome variable y. In bivariate regression models, x and y are the only relevant variables included, an the estimated impact of x on y is found in the 'coefficient' on the x-term. Equation 1 below shows an example of a bivariate model between x and y, where b is the coefficient that tells us the estimated impact of an increase in x on y (Koehrsen, 2018). The error term, e, represents all other effects of variables that are not listed in the model.
 
-y = a + b(x) + e     (1)
+y = α + βx + ϵ    (1)
 
 However, bivariate models are most often subject to omitted variable bias, an issue that arises when additional variables that have an impact on y are not included in the model. Omitted variable bias results in a biased coefficient on x, or a biased b estimate. For this reason, multivariate models that include several x's rather than just the one of interest are generally preferred. 
 
