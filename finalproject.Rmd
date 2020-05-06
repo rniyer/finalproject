@@ -1,7 +1,8 @@
 ---
-title: "PPOL 670 Final Project: Bayesian Methodology and Inferential Applications to Public Policy"
+title: "PPOL 670 Final Project"
+subtitle: "Bayesian Methodology and Inferential Applications to Public Policy"
 author: "Ritika Iyer"
-date: "5/6/2020"
+date: "May 6, 2020"
 output:
   html_document: default
   pdf_document: default
@@ -12,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
+### INTRODUCTION: 
 This paper will introduce Bayesian methodology as a way of answering inferential questions in the public policy space. It will start by giving an overview of linear regression, covering both frequentist and Bayesian frameworks. The next sections will compare and contrast frequentist and Bayesian models, drawing extensively from the literature to discuss the benefits and shortcomings of each type. I then hope to make the case as to why Bayesian methodology is particularly useful and relevant to informing public policy decisions, as compared to other methodologies. I provide real-world examples of Bayesian applications in the public domain from government, research organizations, and universities. The final section of this paper applies Bayesian inferential analysis to a simple policy question in the international development space. This analysis uses childhood poverty data from eastern India to understand the relationship between child health status (measured by Body Mass Index, or BMI) and academic performance (measured by test scores). The application component of this paper includes descriptive statistics, Bayesian inference and Markov Chain Monte Carlo sampling methodology, posterior distribution checks and inferential analysis. It ends with a comparison of results from the Bayesian methodology versus a frequentist methodology across different sample sizes. 
 
 Regression methods are useful for estimating a relationship between two variables, x and y. Here, we treat x as the independent variable that has an estimated impact, measured through the regression method, on our dependent or outcome variable y. In bivariate regression models, x and y are the only relevant variables included, an the estimated impact of x on y is found in the 'coefficient' on the x-term. Equation 1 below shows an example of a bivariate model between x and y, where b is the coefficient that tells us the estimated impact of an increase in x on y (Koehrsen, 2018). The error term, e, represents all other effects of variables that are not listed in the model.
@@ -24,7 +26,7 @@ In frequentist models of linear regression, like the one showed above, we are ab
 
 
 
-### INTRODUCTION TO BAYESIAN THINKING AND METHODOLOGY:
+### BAYESIAN THINKING AND METHODOLOGY:
 Before diving into the specifics of the Bayesian regression model, it is important to first understand the theory of conditional probabilities that it relies upon. Let us assume that there are two events, Event A and Event B. The probability that Event A occurs is p(A) and the probability that Event B occurs is p(B). If Event A’s occurrence is unrelated to Event B’s occurrence or non-occurrence, that means the two events are independent. In this case, the joint probability of both events occurring is equal to p(A and B) = p(A)*p(B). 
 
 However, if Event A’s occurrence is conditional upon Event B’s occurrence, then the two events are not independent. A conditional probability is the probability that Event A will happen, given that another event, Event B, already occurred. If we know that Event B happened, then the conditional probability of Event A happening is equal to p(A/B). In this case with conditionality involved, the joint probability of the two events occurring is p(A and B) = p(A)*p(B/A). 
