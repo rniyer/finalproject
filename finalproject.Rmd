@@ -303,6 +303,8 @@ stan_hist(ppvtbayes, pars=c("bmi_r3"), bins=50)
 The posterior sample also provides an estimate of the average score change with a one unit increase in child BMI and a 95 percent confidence interval, as shown by the parameter on BMI below. The summary of the posterior distribution for BMI shows that a one unit increase in child BMI is associated with an approximate 1.01 score point increase on the PPVT Rasch test, on average. The confidence interval estimation tells us that there is a 95 percent probability that a one unit increase in a child's BMI is associated with an improvement in their PPVT Rasch test performance in the range of approximately 0.63 and 1.4 points. This finding confirms a slight positive correlation between BMI and student test performance, which is different frm what we found previously in the descriptive analysis. 
 
 ```{r bayesmodel-posterior, message = FALSE}
+summary(ppvtbayes)
+
 posterior_bmi <- as.data.frame(ppvtbayes, pars=c("bmi_r3"))[,"bmi_r3"]
 mean_bmi <- mean(posterior_bmi)
 ci_bmi <- quantile(posterior_bmi, probs=c(0.05, 0.95)) 
@@ -324,7 +326,7 @@ mean_bmi2
 
 ```
 
-The plots below show the importance of the priors in determining the posterior distribution discussed above. The intervals plotted next to each other show that the posterior distribution mean estimate for each value - Intercept, BMI, and error - is slightly above that of the prior Future analysis could use these plots to identify a more informative prior and adapt the model using a new variance and slope accordingly (James, 2019). 
+The plots below show the importance of the priors in determining the posterior distribution discussed above. The intervals plotted next to each other show that the posterior distribution mean estimate for each value - Intercept, BMI, and error - is slightly above that of the prior. Future analysis could use these plots to identify a more informative prior and adapt the model using a new variance and slope accordingly (James, 2019). 
 
 ```{r bayesmodel-priorstwo, message = FALSE}
 posterior_vs_prior(ppvtbayes, group_by_parameter = TRUE, pars=c("(Intercept)"))
@@ -336,7 +338,7 @@ posterior_vs_prior(ppvtbayes, group_by_parameter = TRUE, pars=c("sigma"))
 ```
 
 ### Frequentist Inference, for comparison 
-Next, we will compare the Bayesian results to those of a Frequentist method, using the same data. The below code builds the frequentist linear regression model and calculates the likelihood estimates for comparison. We find that the maximum likelihood estimations of the intercept is equal to approximately 233.2 points, which is very close to the estimation from the Bayesian methodology of 233.1 points. The BMI estimation from the frequentist methodology shown below is equal to 1.012, which is also very close to the mean BMI estimation from the posterior distrbution, equal to 1.013, of the Bayes model. 
+Next, we will compare the Bayesian results to those of a Frequentist method, using the same data. The below code builds the frequentist linear regression model and calculates the likelihood estimates for comparison. We find that the maximum likelihood estimations of the intercept is equal to approximately 233.2 points, which is very close to the estimation from the Bayesian methodology of 233.1 points. The BMI estimation from the frequentist methodology shown below is equal to 1.012, which is also very close to the mean BMI estimation from the posterior distrbution, equal to 1.013, of the Bayes model. The estimates are both statistically significant at the 5% level of significance. 
 
 ```{r frequentistmodel-ppvt, message = FALSE}
 ppvtfrequentist <- glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives, family = gaussian)
@@ -347,10 +349,130 @@ summary(ppvtfrequentist)
 
 These estimates across methodologies are likely close because of the dataset's relatively large sample size - as you will recall from previous sections, Bayesian estimates resemble OLS estimates as the sample size gets larger. Therefore, the importance of the priors decreases as the sample size n increases. 
 
+### Impact of Sample Size on Results 
+In order to test the above idea - that priors become more important if the sample size n is smaller - we can run a similar analysis after randomly selecting 200 children from the broader dataset used previously. The code below takes a random sample of 200 children from the broader dataset and limits the new dataset to only contain the variables of interest.  
 
+This exercise is an interesting way to compare the differences in estimates across the two methodologies, while also potentially highlighting the importance of sample size as a determinant of model selection. Given that many studies in developing countries have small sample sizes, this is particularly relevant to inferential analysis of policy issues in international development. 
 
+```{r small-sample, message = FALSE}
+set.seed(20200301)
 
+younglives_sample <- younglives %>% 
+  sample_n(200) %>% 
+  select(r3ppvt_corrected_rasch, bmi_r3, wi_r3, agechild_r3, r3_female, hhsize_r3, totalexp_r3, r3_rural)
+
+glimpse(younglives_sample)
+
+```
+
+We will use the same basic model demonstrated previously and shown in Equation 6 on the new data. Utilizing default priors once again from the rstanarm function, the code to build the model on the new data is below.
+
+```{r bayesmodel-smallppvt, message = FALSE}
+ppvtbayes_small <- stan_glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives_sample, family = gaussian)
+
+```
+
+The trace plots for the posterior distributions generated by the above model are below. We see that the smaller size has increased the volatility in the graphs, with more ups and downs across each chain. This is shown by a much larger range on the y-axis of each plot, demonstrating that the total width of each chain is much larger than what we saw on the previous trace plots. This indicades less stability and lower quality mixing or overlap between chains. In addition, the sigma error is now centered around a much higher value - previously, it was below 14.0, but the lower sample size has made the new center point closerr to 15.0. The center values for the Intercept and BMI estimates are also much lower in the below plots than they were previously with the larger sample size.  
+
+```{r bayesmodel-smalltrace, message = FALSE}
+stan_trace(ppvtbayes_small, pars=c("(Intercept)","bmi_r3","sigma"))
+
+```
+
+The graph below shows the predictive strength of the posterior distribution estimated from the model using the smaller dataset. We see that the dark blue line, from the observed data, is right around the center of the distribution of the light blue lines, which show simulated data from the model. The peak of the dark blue distribution is much lower in terms of vertical height than in the previous example with a higher sample size.  
+
+```{r bayesmodel-smallposteriorcheck, message = FALSE}
+pp_check(ppvtbayes_small)
+
+```
+
+Now we can use the smaller dataset model to infer about the relationship of interest between child health status (captured by child BMI) and academic performance (measured by standardized test scores on the PPVT). The below histogram shows the posterior sample estimations of child BMI. We see that the distribution ranges mostly between -2 and 2, but is centered uniformly around 0. This is different from the previous example with the larger sample size - that histogram centered around 1.0. 
+
+```{r bayesmodel-smallbmihisto, message = FALSE}
+stan_hist(ppvtbayes_small, pars=c("bmi_r3"), bins=50)
+
+```
+
+The summary of the model's results show that the intercept (baseline test score) is equal to 204.7 points. The summary of the posterior distribution for BMI shows that a one unit increase in child BMI is associated with just an approximate 0.04 score point increase on the PPVT Rasch test, on average. The confidence interval estimation tells us that there is a 95 percent probability that a one unit increase in a child's BMI is associated with an improvement in their PPVT Rasch test performance in the range of approximately -1.36 and 1.44 points. Given that 0 is included in the confidence interval, these estimates are not statistically significant. 
+
+```{r bayesmodel-smallposterior, message = FALSE}
+summary(ppvtbayes_small)
+
+posterior_bmi <- as.data.frame(ppvtbayes_small, pars=c("bmi_r3"))[,"bmi_r3"]
+mean_bmi <- mean(posterior_bmi)
+ci_bmi <- quantile(posterior_bmi, probs=c(0.05, 0.95)) 
+
+summary(posterior_bmi)
+mean_bmi
+ci_bmi
+
+```
+
+The Bayesian results presented above are very different from the ones presented previously with the larger sample size in terms of both magnitude and statistical significance. Given that the model remained the same and the only thing done differently across the two analyses is the sample size, we can confidently say that sample size does have a pretty significant impact on Bayesian results. Therefore, it makes sense to consider how large a dataset is prior to moving forward with a Bayesian methodology, unless you are relying on powerful and informative priors that can increase the power and relevance of the analysis. In this case, using default and likely non-informative priors on a small sample size does not work well for inference. 
+
+As shown in the previous example, the plots below show the importance of the priors in determining the posterior distribution. Though the Intercept and the BMI charts look similar to those from the previous example, the error term sigma is slightly higher and has a larger interval than before. This is likely because the sample size is reduced. 
+
+```{r bayesmodel-priorssmalltwo, message = FALSE}
+posterior_vs_prior(ppvtbayes_small, group_by_parameter = TRUE, pars=c("(Intercept)"))
+
+posterior_vs_prior(ppvtbayes_small, group_by_parameter = TRUE, pars=c("bmi_r3"))
+
+posterior_vs_prior(ppvtbayes_small, group_by_parameter = TRUE, pars=c("sigma"))
+
+```
+
+Now, we can use this smaller sample for the frequentist inference to better compare the two analyses using different datasets. The below code builds the frequentist linear regression model on the smaller dataset and calculates the likelihood estimates for comparison. We find that the maximum likelihood estimations of the intercept is equal to approximately 204.9 points, which is close to the average estimation from the Bayesian methodology of 204.7 points. The intercept is statistically significant. The BMI estimation from the frequentist methodology shown below is equal to 0.03, which is also close to the mean BMI estimation from the posterior distrbution, equal to 0.04, of the Bayes model. It is a bit surprising that the estimates are so close, despite the smaller sample size. However, the coefficient is not statistically significant, with a p-value equal to approximately 0.97. 
+
+```{r frequentistmodel-smallppvt, message = FALSE}
+ppvtfrequentist_small <- glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives_sample, family = gaussian)
+
+summary(ppvtfrequentist_small)
+
+```
+
+Although the coefficients are close to each other across the two methodologies with the smaller dataset, we lose statistical significance on the estimates so that they are no longer as meaningful. There is also more variation in the residuals for both models with the smaller sample size. This is not surprising, as sample size is important to both power and strength of linear regression models. 
+
+### CONCLUSIONS 
+This paper started with an introduction to Bayesian thinking, explaining the two main advantages of using a Bayesian methodology for linear regression: the use of priors to inform the model, as well as a probabilistic estimation in the form of a posterior distribution. These benefits of Bayesian regression methods make it a particularly useful framework for policymakers, whom may find it difficult to rely on point estimates from frequentist models to inform policy decisions. These and other differences between Bayesian and frequentist models were discussed at length, along with examples of when and how Bayesian methods can be used to solve important issues in the public domain. The application component of this paper examined the impact of child health outcomes, like BMI, on education performance, measured by test scores, for children in India. We find that there is a positive relationship between the two variables of interest - higher BMIs are generally associated with better test performance in children. We get similar estimates for both Bayesian and frequentist methodologies, even when the sample size is dramatically reduced. However, we do see that a smaller sample size makes our coefficients lose statistical significance, have larger errors, and more variation in the chain sampling. 
+
+From a policy perspective, particularly in the international development context, sample size is important because data quality can be difficult to manage but does play a significant role in the quality of analysis generated for decisionmaking. If moving forward with a Bayesian methodology despite a relatively small sample size, researchers should put significant though into selecting informative priors rather than relying on defaults. This is also important, because as sample size decreases, Bayesian results rely increasingly on the priors. Not all inferential questions will be best answered by Bayesian thinking, but many can be. In thinking about how to address development challenges globally, probabilistic estimates are likely to be much more relevant and useful than point estimates that lack nuance. There is incredible potential for policymakers worldwide to adopt Bayesian techniques to improve, expand, and inform public programs. 
 
 ### Sources: 
+American Statistical Association (ASA) (2016), “ASA Statement on Statistical Significance and P values,” The American Statistician, 70, DOI: 10.1080/00031305.2016.1154108. 
 
+Amos Development. Trace Plot. http://amosdevelopment.com/webhelp/imp-post-radiotrace.htm. 
+
+Brown, P. J., Firth, D. and Payne, C. (1997). Forecasting on British election night 1997. J. Roy. Statist. Soc. Ser. A 162 211– 226. 
+
+Bernardo, J. M. and Giron, F. J. (1992). Robust sequential prediction from non-random samples: The election night fore- casting. In Bayesian Statistics 4 (J. M. Bernardo, J. O. Berger, D. V. Lindley and A. F. M. Smith, eds.) 3–60. Oxford Univ. Press, Oxford. MR1380270
+
+Clyde, M., Cetinkaya-Rundel, M., Rundel, C., Banks, D., Chai, C., Huang, L. (2020). An Introduction to Bayesian Thinking. https://statswithr.github.io/book/. 
+
+Fienberg, S. E. (2011). Bayesian Models and Methods in Public Policy and Government Settings. Statist. Sci. 26, no. 2, 212--226. doi:10.1214/10-STS331. https://projecteuclid.org/euclid.ss/1312204010
+
+Fienberg, S. E. (2006). Does it make sense to be an "objective Bayesian"? (comment on articles by Berger and by Goldstein). Bayesian Anal. 1, no. 3, 429--432. doi:10.1214/06-BA116C. https://projecteuclid.org/euclid.ba/1340371039
+
+Freeman, N., Chew, R., Smith, K., Wenger, M., Underwood, M., van Hasselt, M., Bir, A., Day, T. (2017). Making Bayesian Analyses Accessible through Visualization. Case Study: Meta-Evaluation of the Health Care Innovation Awards. RTI International.
+
+Gelman, A. (2014). How Bayesian Analysis Cracked the Red-State, Blue-State Problem. Statistical Science. Vol. 29, No. 1, 26-35. Institute of Mathematical Statistics. 
+
+Holzwart,  Wright. (2018). Bayesian Methods for Social Policy Research and Evaluation. OPRE Report 2018-38. 
+
+Inzaugarat, E. (2018). Linear and Bayesian modeling in R: Predicting movie popularity. Towards Data Science. https://towardsdatascience.com/linear-and-bayesian-modelling-in-r-predicting-movie-popularity-6c8ef0a44184. 
+
+James, N. (2019). Introduction to Bayesian Regression Modeling in R using rstanarm. http://biostat.mc.vanderbilt.edu/wiki/pub/Main/StatisticalComputingSeries/bayes_reg_rstanarm.html. 
+
+Kaplan, D. (2017). On the Utility of Bayesian Model Averaging for Optimizing Prediction: Two Case Studies. The University of Wisconsin, Madison. 
+
+Koehrsen, W. (2018). Introduction to Bayesian Linear Regression. Towards Data Science. https://towardsdatascience.com/introduction-to-bayesian-linear-regression-e66e60791ea7. 
+
+Paddock, S. (2017). Applications: Health Care Provider Performance Assessment. RAND Corporation. 
+
+Oxford Department of International Development. (2016). Young Lives. https://www.younglives.org.uk. 
+
+Schneider, S. H. (2002). Global warming: Neglecting the complexities. Sci. Amer. 286 62–65. 
+
+Stan. (2020). https://mc-stan.org. 
+
+Vollmer, L., Sama-Miller, E., Maccarone, A. (2017). The Right Tool for the Job: A Bayesian Meta-Regression of Employment and Training Studies. 
 
