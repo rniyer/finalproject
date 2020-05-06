@@ -84,7 +84,7 @@ ggplot(data = younglives,
   theme(legend.position = "bottom",
         legend.title=element_blank()) +
   labs(title =
-         paste("Test scores in verbal, math subjects have a positive, but slightly weak correlation"),
+         paste("Test scores in verbal, math subjects have positive, slightly weak correlation"),
        caption = "Source: Young Lives Survey, 2009",
        x = "PPVT Rasch Score",
        y = "Math Test Rasch Score")
