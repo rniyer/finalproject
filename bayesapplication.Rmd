@@ -70,7 +70,7 @@ ggplot(data = younglives,
 
 ```
 
-As expected, the above scatter plot shows that our two independent variables of interest, BMI and BMI-for-Age Z Score, are positively correlated. This might help us The below plots show that verbal and math scores are also positively correlated, although it seems slightly weaker. This implies that as children perform better in math, they also perform better on the PPVT score. We can infer that changes to academic performance are not necessarily only seen in certain subjects, but across subjects in school.
+As expected, the above scatter plot shows that our two independent variables of interest, BMI and BMI-for-Age Z Score, are positively correlated. This helps us choose one of these two variables for our analysis, since they are strongly correlated. The below plots show that verbal and math scores are also positively correlated, although it seems slightly weaker. This implies that as children perform better in math, they also perform better on the PPVT. We can infer that changes to academic performance are not necessarily only seen in certain subjects, but across subjects in school.
 
 ```{r scatter-scores, message = FALSE}
 # Test scores across subjects
@@ -177,11 +177,9 @@ ggplot(younglives, aes(x = r3math_corrected_rasch)) +
 
 
 #### Bayesian Inference 
-There are four main steps involved in a Bayesian inferential analysis, as outlined below. 
+To conduct Bayesian inference, we must specify the probability model, which is based on the likelihood of the observed data and the specified priors. We expect that the priors are the main differentiating factors between the Bayesian and Frequentist results, since the likelihood is based on the outcome and often will not vary across model types (James, 2019). For the purpose of this analysis, we will use default prior distributions from the rstanarm package in R. The Stan general package is a probability-based language specifically used for Bayesian statistical inference (Stan, 2020). 
 
-Firstly, we must specify the probability model, which is based on the likelihood of the observed data and the specified priors. We expect that the priors are the main differentiating factors between the Bayesian and Frequentist results, since the likelihood is based on the outcome and often will not vary across model types (James, 2019). For the purpose of this analysis, we will use default prior distributions from the rstanarm package in R. The Stan general package is a probability-based language specifically used for Bayesian statistical inference (Stan, 2020). 
-
-For this analysis, we will use a linear regression model where the outcome y, PPVT test score, is normal given the covariate of interest, BMI, and the control variables. We also assume that the linear model has independent errors. These assumptions imply that the posterior distribution will have multiple parameters, one associated with each covariate, a constant, and an error term. Again, these parameters will be estimated using default priors from the rstanarm package, which helps determine the probability model of interest. As discussed previously and based on the descriptive statistics, the model we are attempting to estimate is in Equation 6 below. For this initial analysis, we will use all children sampled in the data set (approximately 2,000 children).
+For this analysis, we will use a linear regression model where the outcome y, PPVT test score, is normal given the covariate of interest, BMI, and the control variables. We also assume that the linear model has independent errors. These assumptions imply that the posterior distribution will have multiple parameters, one associated with each covariate, a constant, and an error term. Again, these parameters will be estimated using default priors from the rstanarm package, which helps determine the probability model of interest. As discussed previously and based on the descriptive statistics, the model we are attempting to estimate is in Equation 6 below. For this initial analysis, we will use all children sampled in the data set, approximately 2,000 children. 
 
 PPVT TEST SCORE = α + β(BMI) + β1(WEALTH INDEX) + β2(CHILDAGE) + β3(FEMALE) + β4(HH SIZE) + β5(TOTAL MONTHLY EXPENDITURE) + β6(RURAL) + ϵ, where i = 1,⋯,n     (6)
 
