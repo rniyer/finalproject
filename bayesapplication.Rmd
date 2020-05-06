@@ -15,9 +15,9 @@ TEST SCORES = α + β(BMI-for-Age Z Score) + CONTROLS + ϵ, where i = 1,⋯,n   
 In the above equations, "CONTROLS" refers to the parameters that will be included in the model as covariates and their respective coefficients/posterior distributions. These covariates are chosen based on whether they are expected to make up some of the variation in test scores (outside of the variation explained by the various independent variables of interest). We do this so that we can isolate the impact of the independent variable of interest on test scores, the dependent variable. Controls that will be included are mainly socioeconomic and demographic variables, like wealth, region, child age, access to services, etc. 
 
 #### Data Description
-I will apply Bayesian regression methods to data from the Young Lives Project, a 15-year study of the changing nature of childhood poverty in Ethiopia, India (Andhra Pradesh and Telangana), Peru and Vietnam. I will specifically use a constructed longitudinal data set from India, with data collected every few years from 2002 to 2016. As a part of the Young Lives research project in India, 1,000 children were sampled for the older cohort (aged 7.5 to 8.5 years old at the start of the study) and 2,000 children were sampled for the younger cohort (aged 6 to 18 months old at the start of the study). I will use the younger cohort data for this analysis. The sampling methodology in the data set of interest is multi-stage and randomly sampled, considered to be nationally representative. The individuals and their households within each cohort were visited five times, comprising five total rounds of data collection per child. The attrition is low, estimated at approximately 1.5 percent across rounds. 
+I will apply Bayesian regression methods to data from the Young Lives Project, a 15-year study of the changing nature of childhood poverty in Ethiopia, India (Andhra Pradesh and Telangana), Peru and Vietnam. I will specifically use a constructed longitudinal data set from India, with data collected every few years from 2002 to 2016. As a part of the Young Lives research project in India, 1,000 children were sampled for the older cohort (aged 7.5 to 8.5 years old at the start of the study) and 2,000 children were sampled for the younger cohort (aged 6 to 18 months old at the start of the study). I will use the younger cohort data for this analysis. The sampling methodology in the data set of interest is multi-stage and randomly sampled, considered to be nationally representative. The individuals and their households within each cohort were visited five times, comprising five total rounds of data collection per child. The attrition is low, estimated at approximately 1.5 percent across rounds (Young Lives, 2016). 
 
-I am  also curious as to how different, but relatively close sample sizes will impact the spread of the posterior distribution. Given that the younger cohort data set has approximately 2,000 students in it, I will test the relationship of interest on two groups of students (n = 200, 2000) to see how estimates change. I will estimate the models on children sampled in Round 3, who were between the ages of 7.5 and 8.5 years old at the time of data collection in 2009.
+I am  also curious as to how different sample sizes will impact the spread of the posterior distribution. Given that the younger cohort data set has approximately 2,000 students in it, I will test the relationship of interest on two groups of students (n = 200, 2000) to see how estimates change. I will estimate the models on children sampled in Round 3, who were between the ages of 7.5 and 8.5 years old at the time of data collection in 2009.
 
 #### Initial Descriptive Statistics and Analysis
 The below code first loads packages that will be useful for the analysis.
@@ -40,7 +40,7 @@ library(bayesplot)
 
 ```
 
-Next, we load the data and look at summary statistics for each variable included. We have two independent variables of interest - BMI and BMI-for-Age Z Score. We also have two outcome variables of interest, test scores on the Peabody Picture Vocabulary Test (PPVT) and a grade-level Math Test. The PPVT is a test designed for all ages that measures both listening and comprehension of single-word vocabulary using both verbal and non-verbal assessment mechanisms. The math tests used in this analysis are at grade-level, and questions asked vary across rounds of data collection. All test scores used this in analysis are standardized using the Rasch method, which removes observations with poor psychometric results and uses Item Response Theory to account for individual child abilities and question difficulty. In Round 3, the researchers whom collected the data standardized all Rasch scores to have an approximate mean of 300 and standard deviation of 15. This information is shown in the summary statistics below, which also shows information on the various control variables of interest that will be used in the analysis. 
+Next, we load the data and look at summary statistics for each variable included. We have two independent variables of interest - BMI and BMI-for-Age Z Score. We also have two outcome variables of interest, test scores on the Peabody Picture Vocabulary Test (PPVT) and a grade-level Math Test. The PPVT is a test designed for all ages that measures both listening and comprehension of single-word vocabulary using both verbal and non-verbal assessment mechanisms. The math tests used in this analysis are at grade-level, and questions asked vary across rounds of data collection. All test scores used this in analysis are standardized using the Rasch method, which removes observations with poor psychometric results and uses Item Response Theory to account for individual child abilities and question difficulty. In Round 3, the researchers whom collected the data standardized all Rasch scores to have an approximate mean of 300 and standard deviation of 15 (Young Lives, 2016). This information is shown in the summary statistics below, which also shows information on the various control variables of interest that will be used in the analysis. 
 
 ```{r load-data, message = FALSE}
 younglives <- read_csv("projectdata.csv") 
@@ -51,7 +51,7 @@ summary(younglives)
 
 It is important to consider how generalizable the results presented below are, and the type of inference we can make from the data at hand. Since the data was sampled randomly and in multiple stages, we do consider it to be nationally representative. Therefore, with cautiousness, we can generalize the results to similar youth in India at the time of data collection. However, given that this application uses survey data that is observational and self-reported, we cannot assume causation between the variables of interest. The results presented are simply showing an association between variables in the data, but may be subject to biases from omitted variables and random error that was not captured in the analysis. 
 
-Before diving into the regression analysis, we will take a better look at the The scatter plots below show the various relationships between the independent and dependent variables of interest. Note that these relationships may not hold once we start linear regression, due to controlling for factors that make up the variation in the outcome variables. 
+Before diving into the regression analysis, we will take a better look at the variables of interest. The scatter plots below show the various relationships between the independent and dependent variables of interest. Note that these relationships may not hold once we start linear regression, due to controlling for factors that make up the variation in the outcome variables. 
 
 ```{r scatter-bmi, message = FALSE}
 ggplot(data = younglives, 
@@ -185,7 +185,7 @@ For this analysis, we will use a linear regression model where the outcome y, PP
 
 PPVT TEST SCORE = α + β(BMI) + β1(WEALTH INDEX) + β2(CHILDAGE) + β3(FEMALE) + β4(HH SIZE) + β5(TOTAL MONTHLY EXPENDITURE) + β6(RURAL) + ϵ, where i = 1,⋯,n     (6)
 
-Given the above model specification, the next step is to draw samples from the posterior distribution (James, 2019). This process gives us an updated distribution of each parameter based on the data we have. The default method that the Stan package uses is the Markov Chain Monte Carlo (MCMC) method, which improves the model search efficiency to obtain the samples. The code for this model is shown below. 
+Given the above model specification, the next step is to draw samples from the posterior distribution (James, 2019). This process gives us an updated distribution of each parameter based on the data we have. The default method that the Stan package uses is the Markov Chain Monte Carlo (MCMC) method, which improves the model search efficiency to obtain the samples. The code for building this model is shown below. 
 
 ```{r bayesmodel-ppvt, message = FALSE}
 ppvtbayes <- stan_glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives, family = gaussian)
@@ -199,16 +199,16 @@ prior_summary(ppvtbayes)
 
 ```
 
-The next step in the Bayesian inference process is to evaluate the model to ensure that the MCMC methodology of sampling is working (James, 2019). There are two checks - using trace plots and estimating R-hat - to assess the effectiveness of the MCMC sampler (James, 2019). A trace, or time-series, plot shows different values of a parameter over time (i.e., across sampled chains) (AMOS Development, 2020). In other words, we can use a trace plot to see when the sampling converges to the distribution and moves away from its priors.  
+We can now evaluate the model to ensure that the MCMC methodology of sampling is working (James, 2019). There are two checks - using trace plots and estimating R-hat - to assess the effectiveness of the MCMC sampler (James, 2019). A trace, or time-series, plot shows different values of a parameter over time (i.e., across sampled chains) (AMOS Development, 2020). In other words, we can use a trace plot to see when the sampling converges to the distribution and moves away from its priors.  
 
-The trace plot shown below takes several sequential draws from the posterior distribution (James, 2019). We see that each chain sampled from the MCMC methodology is centered around a value, although there is some more volatility in terms of extremes across all charts. The first plot shows the Intercept, or the baseline PPVT Rasch score if all other parts of the model are equal to 0. It seems to center just above 230. The middle graph shows the BMI, which centers around 1.0. The sigma chart chains center between 13.5 and 14.0. They are all centered around a single value, which implies stability and proper mixing across chains, since they are often overlapping (James, 2019). Additionally, across all of these charts, we see vertical variation, but no long-term trend over time. We might expect that if our sample was much larger, comprised of 100,000 children, the trace plot might have much less volatility and look more squeezed together (AMOS Development, 2020).
+The trace plot shown below takes several sequential draws from the posterior distribution (James, 2019). We see that each chain sampled from the MCMC methodology is centered around a value, although there is some more volatility in terms of extremes across all charts. The first plot shows the Intercept, or the baseline PPVT Rasch score if all other parts of the model are equal to 0. It seems to center just above 230. The middle graph shows the BMI, which centers around 1.0. The sigma chart chains center between 13.5 and 14.0. They are all centered around a single value, which implies stability and proper mixing across chains, since they are often overlapping (James, 2019). Additionally, across all of these charts, we see vertical variation, but no long-term pattern over time. We might expect that if our sample was much larger, comprised of 100,000 children for example, the trace plot might have much less volatility and look more squeezed together (AMOS Development, 2020).
 
 ```{r bayesmodel-trace, message = FALSE}
 stan_trace(ppvtbayes, pars=c("(Intercept)","bmi_r3","sigma"))
 
 ```
 
-The next check for the MCMC sampling methodology is the R-hat estimator of variance, which also helps monitor convergence across the chains (James, 2019). This is shown below using the simple summary command on the model, under the 'MCMC Diagnostics' section of the output. We see that the R-hat values for each parameter equals 1, implying convergence. There are a few other relevant findings from the model summary that will be discussed later on in this paper. 
+The next check for the MCMC sampling methodology is the R-hat estimator of variance, which also helps monitor convergence across the chains (James, 2019). This is shown below using the simple summary command on the model, under the 'MCMC Diagnostics' section of the output. We see that the R-hat values for each parameter equals 1, implying convergence (James, 2019). There are a few other relevant findings from the model summary, namely the distribution estimates, that will be discussed later on in this paper. 
 
 ```{r bayesmodel-rhat, message = FALSE}
 summary(ppvtbayes)
@@ -225,7 +225,7 @@ pp_check(ppvtbayes)
 Now that we understand the posterior model and are confident that the MCMC sampling methodology worked based on the above checks, we can use the model to infer about the relationship of interest between child health status (captured by child BMI) and academic performance (measured by standardized test scores on the PPVT). The below histogram shows the posterior sample estimations of child BMI. We see that the distribution ranges mostly between 0.5 and 1.5, with a relatively uniform center around 1.0. 
 
 ```{r bayesmodel-bmihisto, message = FALSE}
-stan_hist(ppvtbayes, pars=c("bmi_r3"), bins=50)
+stan_hist(ppvtbayes, pars=c("bmi_r3"), bins=60)
 
 ```
 
@@ -244,9 +244,7 @@ ci_bmi
 
 ```
 
-The code below uses the posterior distribution to estimate the probability that the change in PPVT Rasch test scores associated with a one unit change in BMI is greater than 1 point. It is helpful, particularly for policy problems, to use probabilities to identify a relevant threshold for the relationship of interest. These results could inform policy design or improve targeting of a program to increase odds of success in impacting the outcome of interest to a pre-determined degree. 
-
-The results tell us that there is an approximate 0.52 probability that a one unit increase in BMI will be associated with an increase in test scores of over 1 point. 
+The code below uses the posterior distribution to estimate the probability that the change in PPVT Rasch test scores associated with a one unit change in BMI is greater than 1 point. It is helpful, particularly for policy problems, to use probabilities to identify a relevant threshold for the relationship of interest. These results could inform policy design or improve targeting of a program to increase odds of success in impacting the outcome of interest to a pre-determined degree. Here, there is an approximate 0.52 probability that a one unit increase in BMI will be associated with an increase in test scores of over 1 point. 
 
 ```{r bayesmodel-posteriortwo, message = FALSE}
 mean_bmi2 <- mean(posterior_bmi > 1.0)
@@ -255,7 +253,7 @@ mean_bmi2
 
 ```
 
-The plots below show the importance of the priors in determining the posterior distribution discussed above. The intervals plotted next to each other show that the posterior distribution mean estimate for each value - Intercept, BMI, and error - is slightly above that of the prior. Future analysis could use these plots to identify a more informative prior and adapt the model using a new variance and slope accordingly (James, 2019). 
+The plots below show the importance of the priors in determining the posterior distribution discussed above. The intervals plotted next to each other show that the posterior distribution mean estimate for each value - Intercept, BMI, and error - is slightly above that of the prior. Future analysis could use these plots to identify a more informative prior and adapt the model accordingly (James, 2019). 
 
 ```{r bayesmodel-priorstwo, message = FALSE}
 posterior_vs_prior(ppvtbayes, group_by_parameter = TRUE, pars=c("(Intercept)"))
