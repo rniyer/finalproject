@@ -1,0 +1,363 @@
+#### Bayesian Methodology and Inferential Applications to Public Policy
+
+#### By Ritika Iyer
+
+
+
+### Application of Bayesian Regression Methods:
+#### Initial Questions of Interest
+Using Bayesian regression methods, I will estimate the impact of child health outcomes, like BMI and BMI-for-age z-score, on academic performance, measured by test scores in math and verbal subjects. Equations 4 and 5 below show this. 
+
+TEST SCORES = α + β(BMI) + CONTROLS + ϵ, where i = 1,⋯,n     (4)
+
+TEST SCORES = α + β(BMI-for-Age Z Score) + CONTROLS + ϵ, where i = 1,⋯,n     (5)
+
+In the above equations, "CONTROLS" refers to the parameters that will be included in the model as covariates and their respective coefficients/posterior distributions. These covariates are chosen based on whether they are expected to make up some of the variation in test scores (outside of the variation explained by the various independent variables of interest). We do this so that we can isolate the impact of the independent variable of interest on test scores, the dependent variable. Controls that will be included are mainly socioeconomic and demographic variables, like wealth, region, child age, access to services, etc. 
+
+#### Data Description
+I will apply Bayesian regression methods to data from the Young Lives Project, a 15-year study of the changing nature of childhood poverty in Ethiopia, India (Andhra Pradesh and Telangana), Peru and Vietnam. I will specifically use a constructed longitudinal data set from India, with data collected every few years from 2002 to 2016. As a part of the Young Lives research project in India, 1,000 children were sampled for the older cohort (aged 7.5 to 8.5 years old at the start of the study) and 2,000 children were sampled for the younger cohort (aged 6 to 18 months old at the start of the study). I will use the younger cohort data for this analysis. The sampling methodology in the data set of interest is multi-stage and randomly sampled, considered to be nationally representative. The individuals and their households within each cohort were visited five times, comprising five total rounds of data collection per child. The attrition is low, estimated at approximately 1.5 percent across rounds. 
+
+I am  also curious as to how different, but relatively close sample sizes will impact the spread of the posterior distribution. Given that the younger cohort data set has approximately 2,000 students in it, I will test the relationship of interest on two groups of students (n = 200, 2000) to see how estimates change. I will estimate the models on children sampled in Round 3, who were between the ages of 7.5 and 8.5 years old at the time of data collection in 2009.
+
+#### Initial Descriptive Statistics and Analysis
+The below code first loads packages that will be useful for the analysis.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-packages, message = FALSE}
+library(sf) 
+library(tidyverse) 
+library(knitr) 
+library(readr)
+library(stringr)
+
+library(rstan)
+library(rstanarm)
+library(ggplot2)
+library(bayesplot)
+
+```
+
+Next, we load the data and look at summary statistics for each variable included. We have two independent variables of interest - BMI and BMI-for-Age Z Score. We also have two outcome variables of interest, test scores on the Peabody Picture Vocabulary Test (PPVT) and a grade-level Math Test. The PPVT is a test designed for all ages that measures both listening and comprehension of single-word vocabulary using both verbal and non-verbal assessment mechanisms. The math tests used in this analysis are at grade-level, and questions asked vary across rounds of data collection. All test scores used this in analysis are standardized using the Rasch method, which removes observations with poor psychometric results and uses Item Response Theory to account for individual child abilities and question difficulty. In Round 3, the researchers whom collected the data standardized all Rasch scores to have an approximate mean of 300 and standard deviation of 15. This information is shown in the summary statistics below, which also shows information on the various control variables of interest that will be used in the analysis. 
+
+```{r load-data, message = FALSE}
+younglives <- read_csv("projectdata.csv") 
+
+summary(younglives)
+
+```
+
+It is important to consider how generalizable the results presented below are, and the type of inference we can make from the data at hand. Since the data was sampled randomly and in multiple stages, we do consider it to be nationally representative. Therefore, with cautiousness, we can generalize the results to similar youth in India at the time of data collection. However, given that this application uses survey data that is observational and self-reported, we cannot assume causation between the variables of interest. The results presented are simply showing an association between variables in the data, but may be subject to biases from omitted variables and random error that was not captured in the analysis. 
+
+Before diving into the regression analysis, we will take a better look at the The scatter plots below show the various relationships between the independent and dependent variables of interest. Note that these relationships may not hold once we start linear regression, due to controlling for factors that make up the variation in the outcome variables. 
+
+```{r scatter-bmi, message = FALSE}
+ggplot(data = younglives, 
+       mapping = aes(x= bmi_r3, 
+                     y= zbfa_r3)) +
+  geom_point(size = 0.4, color = "green") +
+  scale_x_continuous(limits = c(10, 24), breaks = c(10, 14, 18, 22)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title=element_blank()) +
+  labs(title =
+         paste("BMI and BMI-for-Age Z-Scores are positively correlated, as expected"),
+       caption = "Source: Young Lives Survey, 2009",
+       x = "Body Mass Index (BMI)",
+       y = "BMI-for-Age Z-Score")
+
+```
+
+As expected, the above scatter plot shows that our two independent variables of interest, BMI and BMI-for-Age Z Score, are positively correlated. This might help us The below plots show that verbal and math scores are also positively correlated, although it seems slightly weaker. This implies that as children perform better in math, they also perform better on the PPVT score. We can infer that changes to academic performance are not necessarily only seen in certain subjects, but across subjects in school.
+
+```{r scatter-scores, message = FALSE}
+# Test scores across subjects
+ggplot(data = younglives, 
+       mapping = aes(x=r3ppvt_corrected_rasch, 
+                     y=r3math_corrected_rasch)) +
+  geom_point(size = 0.4, color = "blue") +
+  scale_x_continuous(limits = c(260, 340), breaks = c(260, 280, 300, 320, 340)) +
+  scale_y_continuous(limits = c(270, 330), breaks = c(270, 290, 310, 330)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title=element_blank()) +
+  labs(title =
+         paste("Test scores in verbal, math subjects have a positive, but slightly weak correlation"),
+       caption = "Source: Young Lives Survey, 2009",
+       x = "PPVT Rasch Score",
+       y = "Math Test Rasch Score")
+
+```
+
+The scatter plots below show the basic relationship between BMI and child test scores in both PPVT and math subjects. Across both subjects, we do not find that there is a strong correlation with BMI. This is a bit surprising, but raises the importance of using Bayesian techniques to see if there is a probability of interest in this relationship. 
+
+```{r scatter-bmiscores, message = FALSE}
+# BMI and PPVT test score
+ggplot(data = younglives, 
+       mapping = aes(x=bmi_r3, 
+                     y=r3ppvt_corrected_rasch)) +
+  geom_point(size = 0.4, color = "orange") +
+  scale_y_continuous(limits = c(260, 340), breaks = c(260, 280, 300, 320, 340)) +
+  scale_x_continuous(limits = c(10, 18), breaks = c(10, 14, 18)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title=element_blank()) +
+  labs(title =
+         paste("Child PPVT test scores have little to no correlation with Body Mass Index"),
+       caption = "Source: Young Lives Survey, 2009",
+       x = "Body Mass Index",
+       y = "PPVT Rasch Score")
+
+
+# BMI and Math test score
+ggplot(data = younglives, 
+       mapping = aes(x=bmi_r3, 
+                     y=r3math_corrected_rasch)) +
+  geom_point(size = 0.4, color = "purple") +
+  scale_y_continuous(limits = c(270, 330), breaks = c(270, 290, 310, 330)) +
+  scale_x_continuous(limits = c(10, 18), breaks = c(10, 14, 18)) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title=element_blank()) +
+  labs(title =
+         paste("Child math test scores have little to no correlation with Body Mass Index"),
+       caption = "Source: Young Lives Survey, 2009",
+       x = "Body Mass Index",
+       y = "Math Test Rasch Score")
+
+```
+
+The first histogram below shows the distribution of the BMI variable, which is slightly right skewed. According to the National Institutes of Health, a BMI of below 18.5 indicates that a person is underweight. We see that the vast majority of children in this sample are considered underweight by this definition, which isn't entirely surprising due to the context of the study looking at childhood poverty in a primarily rural and developing region of the world. The mean BMI seems to be just below 14, which is very low. 
+
+The second histogram below shows the distribution of the BMI-for-Age Z-Scores for the children. Again, we see that the majority of the sample is below the average BMI for the age group, shown on the histogram as 0. This distribution is slightly left skewed. 
+
+```{r histo-bmi, fig.width=9, fig.height=3, message = FALSE}
+ggplot(younglives, aes(x = bmi_r3)) + 
+  geom_histogram(fill="lightgreen", alpha = 0.7) +
+  theme_bw() +
+  scale_x_continuous(limits = c(10, 20), breaks = c(10, 12, 14, 16, 18, 20)) +
+  labs(x = "Body Mass Index", 
+       y= "Count", 
+       title = "Distribution of Body Mass Index for Children between 7.5 and 8.5 years old",
+       caption = "Source: Young Lives Survey, 2009")
+
+ggplot(younglives, aes(x = zbfa_r3)) + 
+  geom_histogram(fill="orange", alpha = 0.7) +
+  theme_bw() +
+  scale_x_continuous(limits = c(-10, 5), breaks = c(-10, -5, 0, 5)) +
+  labs(x = "BMI-for-Age Z-Score",
+       y= "Count", 
+       title = "Distribution of Body Mass Index-for-Age Z-Scores for Children between 7.5 and 8.5 years old",
+       caption = "Source: Young Lives Survey, 2009")
+
+```
+
+The first histogram below shows the distribution of the PPVT scores variable, which is slightly left skewed. It resembles a normal distribution otherwise. The second histogram shows the distribution of the Math test scores variable, which is much less uniform and seems to have the highest count at a score of 300. There seems to be a lot more variability in the math score distribution than that of the verbal test. For this reason, we will move forward with the PPVT score for the outcome variable of interest in the inferential analysis.
+
+```{r histo-scores, fig.width=9, fig.height=3, message = FALSE}
+ggplot(younglives, aes(x = r3ppvt_corrected_rasch)) + 
+  geom_histogram(fill="yellow", alpha = 0.7) +
+  theme_bw() +
+  labs(x = "PPVT Rasch Scores", 
+       y= "Count", 
+       title = "Distribution of PPVT Rasch Scores for Children between 7.5 and 8.5 years old",
+       caption = "Source: Young Lives Survey, 2009")
+
+ggplot(younglives, aes(x = r3math_corrected_rasch)) + 
+  geom_histogram(fill="blue", alpha = 0.7) +
+  theme_bw() +
+  labs(x = "Math Test Rasch Score",
+       y= "Count", 
+       title = "Distribution of Math Test Rasch Scores for Children between 7.5 and 8.5 years old",
+       caption = "Source: Young Lives Survey, 2009")
+
+```
+
+
+#### Bayesian Inference 
+There are four main steps involved in a Bayesian inferential analysis, as outlined below. 
+
+Firstly, we must specify the probability model, which is based on the likelihood of the observed data and the specified priors. We expect that the priors are the main differentiating factors between the Bayesian and Frequentist results, since the likelihood is based on the outcome and often will not vary across model types (James, 2019). For the purpose of this analysis, we will use default prior distributions from the rstanarm package in R. The Stan general package is a probability-based language specifically used for Bayesian statistical inference (Stan, 2020). 
+
+For this analysis, we will use a linear regression model where the outcome y, PPVT test score, is normal given the covariate of interest, BMI, and the control variables. We also assume that the linear model has independent errors. These assumptions imply that the posterior distribution will have multiple parameters, one associated with each covariate, a constant, and an error term. Again, these parameters will be estimated using default priors from the rstanarm package, which helps determine the probability model of interest. As discussed previously and based on the descriptive statistics, the model we are attempting to estimate is in Equation 6 below. For this initial analysis, we will use all children sampled in the data set (approximately 2,000 children).
+
+PPVT TEST SCORE = α + β(BMI) + β1(WEALTH INDEX) + β2(CHILDAGE) + β3(FEMALE) + β4(HH SIZE) + β5(TOTAL MONTHLY EXPENDITURE) + β6(RURAL) + ϵ, where i = 1,⋯,n     (6)
+
+Given the above model specification, the next step is to draw samples from the posterior distribution (James, 2019). This process gives us an updated distribution of each parameter based on the data we have. The default method that the Stan package uses is the Markov Chain Monte Carlo (MCMC) method, which improves the model search efficiency to obtain the samples. The code for this model is shown below. 
+
+```{r bayesmodel-ppvt, message = FALSE}
+ppvtbayes <- stan_glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives, family = gaussian)
+
+```
+
+The below code gives us more information on the default priors used by the rstanarm function. The default is a normal distribution for the intercept and coefficient priors. The intercept prior is centered around 0 but has a higher vertical variance than the priors for the coefficients do. An exponential distribution is used as a prior for the error term. 
+
+```{r defaultpriors, message = FALSE}
+prior_summary(ppvtbayes)
+
+```
+
+The next step in the Bayesian inference process is to evaluate the model to ensure that the MCMC methodology of sampling is working (James, 2019). There are two checks - using trace plots and estimating R-hat - to assess the effectiveness of the MCMC sampler (James, 2019). A trace, or time-series, plot shows different values of a parameter over time (i.e., across sampled chains) (AMOS Development, 2020). In other words, we can use a trace plot to see when the sampling converges to the distribution and moves away from its priors.  
+
+The trace plot shown below takes several sequential draws from the posterior distribution (James, 2019). We see that each chain sampled from the MCMC methodology is centered around a value, although there is some more volatility in terms of extremes across all charts. The first plot shows the Intercept, or the baseline PPVT Rasch score if all other parts of the model are equal to 0. It seems to center just above 230. The middle graph shows the BMI, which centers around 1.0. The sigma chart chains center between 13.5 and 14.0. They are all centered around a single value, which implies stability and proper mixing across chains, since they are often overlapping (James, 2019). Additionally, across all of these charts, we see vertical variation, but no long-term trend over time. We might expect that if our sample was much larger, comprised of 100,000 children, the trace plot might have much less volatility and look more squeezed together (AMOS Development, 2020).
+
+```{r bayesmodel-trace, message = FALSE}
+stan_trace(ppvtbayes, pars=c("(Intercept)","bmi_r3","sigma"))
+
+```
+
+The next check for the MCMC sampling methodology is the R-hat estimator of variance, which also helps monitor convergence across the chains (James, 2019). This is shown below using the simple summary command on the model, under the 'MCMC Diagnostics' section of the output. We see that the R-hat values for each parameter equals 1, implying convergence. There are a few other relevant findings from the model summary that will be discussed later on in this paper. 
+
+```{r bayesmodel-rhat, message = FALSE}
+summary(ppvtbayes)
+
+```
+
+The below graph allows us to understand the predictive strength of the posterior distribution estimated from the model. This is helpful because if our model is a good fit to the predicted distributions, then we can use it to create data that is similar to the observed data (James, 2019). In the graph below, the dark blue line shows the observed data for the PPVT Rasch scores. It is slightly higher and to the left of the light blue lines, which show simulated data from the posterior distribution estimated from the model. 
+
+```{r bayesmodel-posteriorcheck, message = FALSE}
+pp_check(ppvtbayes)
+
+```
+
+Now that we understand the posterior model and are confident that the MCMC sampling methodology worked based on the above checks, we can use the model to infer about the relationship of interest between child health status (captured by child BMI) and academic performance (measured by standardized test scores on the PPVT). The below histogram shows the posterior sample estimations of child BMI. We see that the distribution ranges mostly between 0.5 and 1.5, with a relatively uniform center around 1.0. 
+
+```{r bayesmodel-bmihisto, message = FALSE}
+stan_hist(ppvtbayes, pars=c("bmi_r3"), bins=50)
+
+```
+
+The posterior sample also provides an estimate of the average score change with a one unit increase in child BMI and a 95 percent confidence interval, as shown by the parameter on BMI below. The summary of the posterior distribution for BMI shows that a one unit increase in child BMI is associated with an approximate 1.01 score point increase on the PPVT Rasch test, on average. The confidence interval estimation tells us that there is a 95 percent probability that a one unit increase in a child's BMI is associated with an improvement in their PPVT Rasch test performance in the range of approximately 0.63 and 1.4 points. This finding confirms a slight positive correlation between BMI and student test performance, which is different from what we found previously in the descriptive analysis. 
+
+```{r bayesmodel-posterior, message = FALSE}
+summary(ppvtbayes)
+
+posterior_bmi <- as.data.frame(ppvtbayes, pars=c("bmi_r3"))[,"bmi_r3"]
+mean_bmi <- mean(posterior_bmi)
+ci_bmi <- quantile(posterior_bmi, probs=c(0.05, 0.95)) 
+
+summary(posterior_bmi)
+mean_bmi
+ci_bmi
+
+```
+
+The code below uses the posterior distribution to estimate the probability that the change in PPVT Rasch test scores associated with a one unit change in BMI is greater than 1 point. It is helpful, particularly for policy problems, to use probabilities to identify a relevant threshold for the relationship of interest. These results could inform policy design or improve targeting of a program to increase odds of success in impacting the outcome of interest to a pre-determined degree. 
+
+The results tell us that there is an approximate 0.52 probability that a one unit increase in BMI will be associated with an increase in test scores of over 1 point. 
+
+```{r bayesmodel-posteriortwo, message = FALSE}
+mean_bmi2 <- mean(posterior_bmi > 1.0)
+
+mean_bmi2
+
+```
+
+The plots below show the importance of the priors in determining the posterior distribution discussed above. The intervals plotted next to each other show that the posterior distribution mean estimate for each value - Intercept, BMI, and error - is slightly above that of the prior. Future analysis could use these plots to identify a more informative prior and adapt the model using a new variance and slope accordingly (James, 2019). 
+
+```{r bayesmodel-priorstwo, message = FALSE}
+posterior_vs_prior(ppvtbayes, group_by_parameter = TRUE, pars=c("(Intercept)"))
+
+posterior_vs_prior(ppvtbayes, group_by_parameter = TRUE, pars=c("bmi_r3"))
+
+posterior_vs_prior(ppvtbayes, group_by_parameter = TRUE, pars=c("sigma"))
+
+```
+
+#### Frequentist Inference, for comparison 
+Next, we will compare the Bayesian results to those of a Frequentist method, using the same data. The below code builds the frequentist linear regression model and calculates the likelihood estimates for comparison. We find that the maximum likelihood estimations of the intercept is equal to approximately 233.2 points, which is very close to the estimation from the Bayesian methodology of 233.1 points. The BMI estimation from the frequentist methodology shown below is equal to 1.012, which is also very close to the mean BMI estimation from the posterior distribution, equal to 1.013, of the Bayes model. The estimates are both statistically significant at the 5% level of significance. 
+
+```{r frequentistmodel-ppvt, message = FALSE}
+ppvtfrequentist <- glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives, family = gaussian)
+
+summary(ppvtfrequentist)
+
+```
+
+These estimates across methodologies are likely close because of the data set's relatively large sample size - as you will recall from previous sections, Bayesian estimates resemble OLS estimates as the sample size gets larger. Therefore, the importance of the priors decreases as the sample size n increases. 
+
+#### Impact of Sample Size on Results 
+In order to test the above idea - that priors become more important if the sample size n is smaller - we can run a similar analysis after randomly selecting 200 children from the broader data set used previously. The code below takes a random sample of 200 children from the broader data set and limits the new data set to only contain the variables of interest.  
+
+This exercise is an interesting way to compare the differences in estimates across the two methodologies, while also potentially highlighting the importance of sample size as a determinant of model selection. Given that many studies in developing countries have small sample sizes, this is particularly relevant to inferential analysis of policy issues in international development. 
+
+```{r small-sample, message = FALSE}
+set.seed(20200301)
+
+younglives_sample <- younglives %>% 
+  sample_n(200) %>% 
+  select(r3ppvt_corrected_rasch, bmi_r3, wi_r3, agechild_r3, r3_female, hhsize_r3, totalexp_r3, r3_rural)
+
+glimpse(younglives_sample)
+
+```
+
+We will use the same basic model demonstrated previously and shown in Equation 6 on the new data. Utilizing default priors once again from the rstanarm function, the code to build the model on the new data is below.
+
+```{r bayesmodel-smallppvt, message = FALSE}
+ppvtbayes_small <- stan_glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives_sample, family = gaussian)
+
+```
+
+The trace plots for the posterior distributions generated by the above model are below. We see that the smaller size has increased the volatility in the graphs, with more ups and downs across each chain. This is shown by a much larger range on the y-axis of each plot, demonstrating that the total width of each chain is much larger than what we saw on the previous trace plots. This indicates less stability and lower quality mixing or overlap between chains. In addition, the sigma error is now centered around a much higher value - previously, it was below 14.0, but the lower sample size has made the new center point closer to 15.0. The center values for the Intercept and BMI estimates are also much lower in the below plots than they were previously with the larger sample size.  
+
+```{r bayesmodel-smalltrace, message = FALSE}
+stan_trace(ppvtbayes_small, pars=c("(Intercept)","bmi_r3","sigma"))
+
+```
+
+The graph below shows the predictive strength of the posterior distribution estimated from the model using the smaller data set. We see that the dark blue line, from the observed data, is right around the center of the distribution of the light blue lines, which show simulated data from the model. The peak of the dark blue distribution is much lower in terms of vertical height than in the previous example with a higher sample size.  
+
+```{r bayesmodel-smallposteriorcheck, message = FALSE}
+pp_check(ppvtbayes_small)
+
+```
+
+Now we can use the smaller data set model to infer about the relationship of interest between child health status (captured by child BMI) and academic performance (measured by standardized test scores on the PPVT). The below histogram shows the posterior sample estimations of child BMI. We see that the distribution ranges mostly between -2 and 2, but is centered uniformly around 0. This is different from the previous example with the larger sample size - that histogram centered around 1.0. 
+
+```{r bayesmodel-smallbmihisto, message = FALSE}
+stan_hist(ppvtbayes_small, pars=c("bmi_r3"), bins=50)
+
+```
+
+The summary of the model's results show that the intercept (baseline test score) is equal to 204.7 points. The summary of the posterior distribution for BMI shows that a one unit increase in child BMI is associated with just an approximate 0.04 score point increase on the PPVT Rasch test, on average. The confidence interval estimation tells us that there is a 95 percent probability that a one unit increase in a child's BMI is associated with an improvement in their PPVT Rasch test performance in the range of approximately -1.36 and 1.44 points. Given that 0 is included in the confidence interval, these estimates are not statistically significant. 
+
+```{r bayesmodel-smallposterior, message = FALSE}
+summary(ppvtbayes_small)
+
+posterior_bmi <- as.data.frame(ppvtbayes_small, pars=c("bmi_r3"))[,"bmi_r3"]
+mean_bmi <- mean(posterior_bmi)
+ci_bmi <- quantile(posterior_bmi, probs=c(0.05, 0.95)) 
+
+summary(posterior_bmi)
+mean_bmi
+ci_bmi
+
+```
+
+The Bayesian results presented above are very different from the ones presented previously with the larger sample size in terms of both magnitude and statistical significance. Given that the model remained the same and the only thing done differently across the two analyses is the sample size, we can confidently say that sample size does have a pretty significant impact on Bayesian results. Therefore, it makes sense to consider how large a data set is prior to moving forward with a Bayesian methodology, unless you are relying on powerful and informative priors that can increase the power and relevance of the analysis. In this case, using default and likely non-informative priors on a small sample size does not work well for inference. 
+
+As shown in the previous example, the plots below show the importance of the priors in determining the posterior distribution. Though the Intercept and the BMI charts look similar to those from the previous example, the error term sigma is slightly higher and has a larger interval than before. This is likely because the sample size is reduced. 
+
+```{r bayesmodel-priorssmalltwo, message = FALSE}
+posterior_vs_prior(ppvtbayes_small, group_by_parameter = TRUE, pars=c("(Intercept)"))
+
+posterior_vs_prior(ppvtbayes_small, group_by_parameter = TRUE, pars=c("bmi_r3"))
+
+posterior_vs_prior(ppvtbayes_small, group_by_parameter = TRUE, pars=c("sigma"))
+
+```
+
+Now, we can use this smaller sample for the frequentist inference to better compare the two analyses using different data sets. The below code builds the frequentist linear regression model on the smaller data set and calculates the likelihood estimates for comparison. We find that the maximum likelihood estimations of the intercept is equal to approximately 204.9 points, which is close to the average estimation from the Bayesian methodology of 204.7 points. The intercept is statistically significant. The BMI estimation from the frequentist methodology shown below is equal to 0.03, which is also close to the mean BMI estimation from the posterior distribution, equal to 0.04, of the Bayes model. It is a bit surprising that the estimates are so close, despite the smaller sample size. However, the coefficient is not statistically significant, with a p-value equal to approximately 0.97. 
+
+```{r frequentistmodel-smallppvt, message = FALSE}
+ppvtfrequentist_small <- glm(r3ppvt_corrected_rasch ~ bmi_r3 + wi_r3 + agechild_r3 + r3_female + hhsize_r3 + totalexp_r3 + r3_rural, data = younglives_sample, family = gaussian)
+
+summary(ppvtfrequentist_small)
+
+```
+
+Although the coefficients are close to each other across the two methodologies with the smaller data set, we lose statistical significance on the estimates so that they are no longer as meaningful. There is also more variation in the residuals for both models with the smaller sample size. This is not surprising, as sample size is important to both power and strength of linear regression models. 
+

@@ -1,0 +1,45 @@
+#### Bayesian Methodology and Inferential Applications to Public Policy
+
+#### By Ritika Iyer
+
+
+
+### Sources:
+American Statistical Association (ASA) (2016), “ASA Statement on Statistical Significance and P values,” The American Statistician, 70, DOI: 10.1080/00031305.2016.1154108. 
+
+Amos Development. Trace Plot. http://amosdevelopment.com/webhelp/imp-post-radiotrace.htm. 
+
+Brown, P. J., Firth, D. and Payne, C. (1997). Forecasting on British election night 1997. J. Roy. Statist. Soc. Ser. A 162 211– 226. 
+
+Bernardo, J. M. and Giron, F. J. (1992). Robust sequential prediction from non-random samples: The election night fore- casting. In Bayesian Statistics 4 (J. M. Bernardo, J. O. Berger, D. V. Lindley and A. F. M. Smith, eds.) 3–60. Oxford Univ. Press, Oxford. MR1380270
+
+Clyde, M., Cetinkaya-Rundel, M., Rundel, C., Banks, D., Chai, C., Huang, L. (2020). An Introduction to Bayesian Thinking. https://statswithr.github.io/book/. 
+
+Fienberg, S. E. (2011). Bayesian Models and Methods in Public Policy and Government Settings. Statist. Sci. 26, no. 2, 212--226. doi:10.1214/10-STS331. https://projecteuclid.org/euclid.ss/1312204010
+
+Fienberg, S. E. (2006). Does it make sense to be an "objective Bayesian"? (comment on articles by Berger and by Goldstein). Bayesian Anal. 1, no. 3, 429--432. doi:10.1214/06-BA116C. https://projecteuclid.org/euclid.ba/1340371039
+
+Freeman, N., Chew, R., Smith, K., Wenger, M., Underwood, M., van Hasselt, M., Bir, A., Day, T. (2017). Making Bayesian Analyses Accessible through Visualization. Case Study: Meta-Evaluation of the Health Care Innovation Awards. RTI International.
+
+Gelman, A. (2014). How Bayesian Analysis Cracked the Red-State, Blue-State Problem. Statistical Science. Vol. 29, No. 1, 26-35. Institute of Mathematical Statistics. 
+
+Holzwart,  Wright. (2018). Bayesian Methods for Social Policy Research and Evaluation. OPRE Report 2018-38. 
+
+Inzaugarat, E. (2018). Linear and Bayesian modeling in R: Predicting movie popularity. Towards Data Science. https://towardsdatascience.com/linear-and-bayesian-modelling-in-r-predicting-movie-popularity-6c8ef0a44184. 
+
+James, N. (2019). Introduction to Bayesian Regression Modeling in R using rstanarm. http://biostat.mc.vanderbilt.edu/wiki/pub/Main/StatisticalComputingSeries/bayes_reg_rstanarm.html. 
+
+Kaplan, D. (2017). On the Utility of Bayesian Model Averaging for Optimizing Prediction: Two Case Studies. The University of Wisconsin, Madison. 
+
+Koehrsen, W. (2018). Introduction to Bayesian Linear Regression. Towards Data Science. https://towardsdatascience.com/introduction-to-bayesian-linear-regression-e66e60791ea7. 
+
+Paddock, S. (2017). Applications: Health Care Provider Performance Assessment. RAND Corporation. 
+
+Oxford Department of International Development. (2016). Young Lives. https://www.younglives.org.uk. 
+
+Schneider, S. H. (2002). Global warming: Neglecting the complexities. Sci. Amer. 286 62–65. 
+
+Stan. (2020). https://mc-stan.org. 
+
+Vollmer, L., Sama-Miller, E., Maccarone, A. (2017). The Right Tool for the Job: A Bayesian Meta-Regression of Employment and Training Studies. 
+
